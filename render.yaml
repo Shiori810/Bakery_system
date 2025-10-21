@@ -3,10 +3,10 @@ services:
     name: bakery-cost-calculator
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn run:app
+    startCommand: gunicorn --bind 0.0.0.0:$PORT run:app
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.11.9
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
