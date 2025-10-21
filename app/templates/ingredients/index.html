@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}材料管理{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-box"></i> 材料管理</h2>
+        <a href="{{ url_for('ingredients.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> 材料登録
+        </a>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-10">
+                    <input type="text" name="search" class="form-control" placeholder="材料名で検索..." value="{{ search }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-secondary w-100">
+                        <i class="bi bi-search"></i> 検索
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {% if ingredients.items %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>材料名</th>
+                                <th>単価</th>
+                                <th>単位</th>
+                                <th>仕入先</th>
+                                <th>アレルゲン</th>
+                                <th>登録日</th>
+                                <th style="width: 150px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ingredient in ingredients.items %}
+                                <tr>
+                                    <td><strong>{{ ingredient.name }}</strong></td>
+                                    <td>{{ "%.2f"|format(ingredient.unit_price) }}円</td>
+                                    <td>{{ ingredient.unit }}</td>
+                                    <td>{{ ingredient.supplier or '-' }}</td>
+                                    <td>
+                                        {% if ingredient.is_allergen %}
+                                            <span class="badge bg-warning text-dark">{{ ingredient.allergen_type }}</span>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ ingredient.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('ingredients.edit', id=ingredient.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i> 編集
+                                        </a>
+                                        <form method="POST" action="{{ url_for('ingredients.delete', id=ingredient.id) }}" class="d-inline" onsubmit="return confirm('この材料を削除してよろしいですか?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav aria-label="ページネーション">
+                    <ul class="pagination justify-content-center">
+                        {% if ingredients.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('ingredients.index', page=ingredients.prev_num, search=search) }}">前へ</a>
+                            </li>
+                        {% endif %}
+
+                        {% for page_num in ingredients.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                            {% if page_num %}
+                                {% if page_num == ingredients.page %}
+                                    <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('ingredients.index', page=page_num, search=search) }}">{{ page_num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if ingredients.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('ingredients.index', page=ingredients.next_num, search=search) }}">次へ</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                    <p class="mt-3">材料が登録されていません</p>
+                    <a href="{{ url_for('ingredients.create') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i> 最初の材料を登録
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

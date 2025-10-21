@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}設定{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="bi bi-gear"></i> 原価計算設定</h2>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-4">
+                            <h5>原価計算に含める項目</h5>
+                            <div class="form-check">
+                                {{ form.include_labor_cost(class="form-check-input") }}
+                                {{ form.include_labor_cost.label(class="form-check-label") }}
+                            </div>
+                            <div class="form-check">
+                                {{ form.include_utility_cost(class="form-check-input") }}
+                                {{ form.include_utility_cost.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mb-4">
+                            <i class="bi bi-plus-circle"></i>
+                            <strong>その他の原価項目を追加する</strong><br>
+                            包装費、減価償却費、家賃など、自由に原価項目を設定できます。<br>
+                            <a href="{{ url_for('custom_costs.index') }}" class="btn btn-sm btn-primary mt-2">
+                                <i class="bi bi-calculator-fill"></i> カスタム原価項目管理
+                            </a>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.hourly_wage.label(class="form-label") }}
+                                <div class="input-group">
+                                    {{ form.hourly_wage(class="form-control" + (" is-invalid" if form.hourly_wage.errors else "")) }}
+                                    <span class="input-group-text">円</span>
+                                </div>
+                                {% if form.hourly_wage.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.hourly_wage.errors[0] }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">製造時間と掛け合わせて人件費を計算します</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                {{ form.monthly_utility_cost.label(class="form-label") }}
+                                <div class="input-group">
+                                    {{ form.monthly_utility_cost(class="form-control" + (" is-invalid" if form.monthly_utility_cost.errors else "")) }}
+                                    <span class="input-group-text">円</span>
+                                </div>
+                                {% if form.monthly_utility_cost.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.monthly_utility_cost.errors[0] }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">月額を時間按分して計算します</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form.profit_margin.label(class="form-label") }}
+                            <div class="input-group" style="max-width: 300px;">
+                                {{ form.profit_margin(class="form-control" + (" is-invalid" if form.profit_margin.errors else "")) }}
+                                <span class="input-group-text">%</span>
+                            </div>
+                            {% if form.profit_margin.errors %}
+                                <div class="invalid-feedback d-block">{{ form.profit_margin.errors[0] }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">販売推奨価格の計算に使用されます</small>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> 戻る
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg"></i> 保存
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-info-circle"></i> 設定について</h5>
+                    <p class="card-text">
+                        <strong>人件費</strong><br>
+                        時給と製造時間から人件費を計算します。
+                    </p>
+                    <p class="card-text">
+                        <strong>光熱費</strong><br>
+                        月額光熱費を時間按分して計算します。
+                    </p>
+                    <p class="card-text">
+                        <strong>利益率</strong><br>
+                        原価に利益率を上乗せして販売推奨価格を計算します。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

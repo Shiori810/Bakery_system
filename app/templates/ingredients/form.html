@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>{{ title }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                {{ form.name.label(class="form-label required") }}
+                                {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                                {% if form.name.errors %}
+                                    <div class="invalid-feedback">{{ form.name.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-4">
+                                {{ form.unit.label(class="form-label required") }}
+                                {{ form.unit(class="form-select" + (" is-invalid" if form.unit.errors else "")) }}
+                                {% if form.unit.errors %}
+                                    <div class="invalid-feedback">{{ form.unit.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.unit_price.label(class="form-label required") }}
+                                <div class="input-group">
+                                    {{ form.unit_price(class="form-control" + (" is-invalid" if form.unit_price.errors else "")) }}
+                                    <span class="input-group-text">円</span>
+                                </div>
+                                {% if form.unit_price.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.unit_price.errors[0] }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">選択した単位あたりの単価</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                {{ form.supplier.label(class="form-label") }}
+                                {{ form.supplier(class="form-control" + (" is-invalid" if form.supplier.errors else "")) }}
+                                {% if form.supplier.errors %}
+                                    <div class="invalid-feedback">{{ form.supplier.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">アレルゲン情報</label>
+                            <div class="form-check">
+                                {{ form.is_allergen(class="form-check-input", id="allergen_check") }}
+                                {{ form.is_allergen.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="allergen_type_container" style="{% if not form.is_allergen.data %}display:none;{% endif %}">
+                            {{ form.allergen_type.label(class="form-label") }}
+                            {{ form.allergen_type(class="form-select") }}
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('ingredients.index') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> 戻る
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg"></i> 保存
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('allergen_check').addEventListener('change', function() {
+    const container = document.getElementById('allergen_type_container');
+    container.style.display = this.checked ? 'block' : 'none';
+});
+</script>
+{% endblock %}

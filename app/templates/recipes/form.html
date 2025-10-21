@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>{{ title }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.product_name.label(class="form-label required") }}
+                            {{ form.product_name(class="form-control" + (" is-invalid" if form.product_name.errors else "")) }}
+                            {% if form.product_name.errors %}
+                                <div class="invalid-feedback">{{ form.product_name.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.category.label(class="form-label") }}
+                                {{ form.category(class="form-select") }}
+                            </div>
+
+                            <div class="col-md-6">
+                                {{ form.production_quantity.label(class="form-label required") }}
+                                <div class="input-group">
+                                    {{ form.production_quantity(class="form-control" + (" is-invalid" if form.production_quantity.errors else "")) }}
+                                    <span class="input-group-text">個</span>
+                                </div>
+                                {% if form.production_quantity.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.production_quantity.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.production_time.label(class="form-label") }}
+                                <div class="input-group">
+                                    {{ form.production_time(class="form-control" + (" is-invalid" if form.production_time.errors else "")) }}
+                                    <span class="input-group-text">分</span>
+                                </div>
+                                {% if form.production_time.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.production_time.errors[0] }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">人件費・光熱費の計算に使用</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                {{ form.shelf_life_days.label(class="form-label") }}
+                                <div class="input-group">
+                                    {{ form.shelf_life_days(class="form-control" + (" is-invalid" if form.shelf_life_days.errors else "")) }}
+                                    <span class="input-group-text">日</span>
+                                </div>
+                                {% if form.shelf_life_days.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.shelf_life_days.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('recipes.index') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> 戻る
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg"></i> {% if recipe %}更新{% else %}次へ (材料設定){% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}店舗登録 - パン屋原価計算アプリ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4">店舗登録</h2>
+
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.login_id.label(class="form-label") }}
+                            {{ form.login_id(class="form-control" + (" is-invalid" if form.login_id.errors else "")) }}
+                            {% if form.login_id.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.login_id.errors[0] }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">4〜50文字の英数字</small>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.store_name.label(class="form-label") }}
+                            {{ form.store_name(class="form-control" + (" is-invalid" if form.store_name.errors else "")) }}
+                            {% if form.store_name.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.store_name.errors[0] }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.password.errors[0] }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">6文字以上</small>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.confirm_password.label(class="form-label") }}
+                            {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else "")) }}
+                            {% if form.confirm_password.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.confirm_password.errors[0] }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-person-plus"></i> 登録
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="mb-0">既にアカウントをお持ちの方</p>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary mt-2">
+                            <i class="bi bi-box-arrow-in-right"></i> ログイン
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,125 @@
+/* カスタムスタイル */
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container, .container-fluid {
+    flex: 1;
+}
+
+footer {
+    margin-top: auto;
+}
+
+/* 必須項目のマーク */
+.form-label.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+/* カードホバー効果 */
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* アラート自動消去のアニメーション */
+.alert {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ボタングループのスペーシング */
+.btn-group .btn {
+    margin-right: 0.5rem;
+}
+
+/* テーブルのレスポンシブ対応 */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+
+/* ナビゲーションバーのアクティブ状態 */
+.navbar-nav .nav-link.active {
+    font-weight: bold;
+    border-bottom: 2px solid #fff;
+}
+
+/* ローディングスピナー */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* プリント用のスタイル */
+@media print {
+    .navbar,
+    .btn,
+    footer,
+    .alert {
+        display: none !important;
+    }
+}
+
+/* カード統計情報のホバー効果 */
+.card.bg-primary:hover,
+.card.bg-success:hover,
+.card.bg-info:hover {
+    opacity: 0.9;
+}
+
+/* フォームエラー表示の改善 */
+.invalid-feedback {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* パンくずリスト */
+.breadcrumb {
+    background-color: transparent;
+    padding: 0;
+}
+
+/* バッジのスタイル改善 */
+.badge {
+    font-weight: normal;
+    padding: 0.35em 0.65em;
+}
+
+/* 空状態のアイコン */
+.bi-inbox {
+    color: #6c757d;
+}
+
+/* ページネーションの改善 */
+.pagination {
+    margin-top: 2rem;
+}
+
+.pagination .page-link {
+    color: #495057;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}ラベル作成 - {{ recipe.product_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-file-earmark-pdf"></i> ラベル作成: {{ recipe.product_name }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('labels.generate', id=recipe.id) }}">
+                        <div class="mb-3">
+                            <label class="form-label">製造日</label>
+                            <input type="date" name="production_date" class="form-control" value="{{ today }}" required>
+                            <small class="form-text text-muted">賞味期限の計算に使用されます</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">印刷枚数</label>
+                            <input type="number" name="label_count" class="form-control" value="1" min="1" max="100" required>
+                            <small class="form-text text-muted">A4用紙1枚につき8枚のラベルが印刷されます</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">表示オプション</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="show_cost" id="show_cost">
+                                <label class="form-check-label" for="show_cost">
+                                    原価を表示 ({{ "%.0f"|format(unit_cost) }}円)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="show_price" id="show_price">
+                                <label class="form-check-label" for="show_price">
+                                    販売価格を表示 ({{ "%.0f"|format(suggested_price) }}円)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('recipes.detail', id=recipe.id) }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> 戻る
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-download"></i> PDFをダウンロード
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-eye"></i> プレビュー</h5>
+                </div>
+                <div class="card-body">
+                    <div class="border p-3 bg-light" style="font-size: 0.85rem;">
+                        <div class="mb-2">
+                            <strong style="font-size: 1.1rem;">{{ recipe.product_name }}</strong>
+                        </div>
+                        <hr>
+                        <div class="mb-2">
+                            <strong>【材料】</strong><br>
+                            <small>
+                                {% if recipe.recipe_ingredients %}
+                                    {{ recipe.recipe_ingredients|map(attribute='ingredient.name')|join('、') }}
+                                {% else %}
+                                    材料未設定
+                                {% endif %}
+                            </small>
+                        </div>
+
+                        {% set allergens = recipe.get_allergens() %}
+                        {% if allergens %}
+                            <div class="mb-2">
+                                <small><strong>アレルゲン:</strong> {{ allergens|join(', ') }}</small>
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-2">
+                            <small>
+                                <strong>製造日:</strong> 2025年1月1日<br>
+                                {% if recipe.shelf_life_days %}
+                                    <strong>賞味期限:</strong> {{ recipe.shelf_life_days }}日後
+                                {% endif %}
+                            </small>
+                        </div>
+
+                        <hr>
+                        <div class="text-end">
+                            <small class="text-muted">{{ recipe.store.store_name }}</small>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <h6>ラベルサイズ</h6>
+                        <p class="text-muted mb-0">
+                            <small>
+                                90mm × 60mm<br>
+                                A4用紙に8枚 (2列 × 4行)
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 今日の日付をデフォルトで設定
+document.querySelector('input[name="production_date"]').valueAsDate = new Date();
+</script>
+{% endblock %}

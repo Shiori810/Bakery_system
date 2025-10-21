@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}ダッシュボード{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="bi bi-house"></i> ダッシュボード</h2>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">登録レシピ数</h6>
+                            <h2 class="card-title mb-0">{{ total_recipes }}</h2>
+                        </div>
+                        <div>
+                            <i class="bi bi-book" style="font-size: 3rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-primary bg-opacity-75">
+                    <a href="{{ url_for('recipes.index') }}" class="text-white text-decoration-none">
+                        レシピ一覧へ <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">登録材料数</h6>
+                            <h2 class="card-title mb-0">{{ total_ingredients }}</h2>
+                        </div>
+                        <div>
+                            <i class="bi bi-box" style="font-size: 3rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-success bg-opacity-75">
+                    <a href="{{ url_for('ingredients.index') }}" class="text-white text-decoration-none">
+                        材料一覧へ <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">原価計算設定</h6>
+                            <p class="mb-0">
+                                {% if cost_setting %}
+                                    {% if cost_setting.include_labor_cost %}人件費 {% endif %}
+                                    {% if cost_setting.include_utility_cost %}光熱費{% endif %}
+                                    {% if not cost_setting.include_labor_cost and not cost_setting.include_utility_cost %}材料費のみ{% endif %}
+                                {% else %}
+                                    未設定
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <i class="bi bi-gear" style="font-size: 3rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-info bg-opacity-75">
+                    <a href="{{ url_for('main.settings') }}" class="text-white text-decoration-none">
+                        設定へ <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> 最近のレシピ</h5>
+                    <a href="{{ url_for('recipes.create') }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-lg"></i> 新規作成
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_recipes %}
+                        <div class="list-group">
+                            {% for recipe in recent_recipes %}
+                                <a href="{{ url_for('recipes.detail', id=recipe.id) }}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ recipe.product_name }}</h6>
+                                        <small class="text-muted">{{ recipe.updated_at.strftime('%Y-%m-%d') }}</small>
+                                    </div>
+                                    <p class="mb-1">
+                                        <span class="badge bg-secondary">{{ recipe.category or 'カテゴリなし' }}</span>
+                                        <span class="text-muted ms-2">製造個数: {{ recipe.production_quantity }}個</span>
+                                    </p>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-4">
+                            <i class="bi bi-inbox"></i><br>
+                            レシピがまだありません<br>
+                            <a href="{{ url_for('recipes.create') }}" class="btn btn-primary mt-2">最初のレシピを作成</a>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> クイックガイド</h5>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li class="mb-2">
+                            <strong>材料を登録</strong><br>
+                            <small class="text-muted">まずは使用する材料を登録しましょう</small>
+                        </li>
+                        <li class="mb-2">
+                            <strong>レシピを作成</strong><br>
+                            <small class="text-muted">商品のレシピと材料を設定します</small>
+                        </li>
+                        <li class="mb-2">
+                            <strong>原価を確認</strong><br>
+                            <small class="text-muted">自動計算された原価を確認できます</small>
+                        </li>
+                        <li class="mb-0">
+                            <strong>ラベルを印刷</strong><br>
+                            <small class="text-muted">商品ラベルをPDF出力できます</small>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}カスタム原価項目管理{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="bi bi-calculator-fill"></i> カスタム原価項目管理</h2>
+
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i>
+        <strong>カスタム原価項目とは？</strong><br>
+        材料費・人件費・光熱費以外の原価を自由に設定できます。<br>
+        例: 包装費、減価償却費、配送費、家賃按分など
+    </div>
+
+    <!-- 新規追加フォーム -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-plus-circle"></i> 新しい原価項目を追加</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('custom_costs.create') }}">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">項目名 <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control" placeholder="例: 包装費" required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">計算方法 <span class="text-danger">*</span></label>
+                        <select name="calculation_type" class="form-select" required>
+                            <option value="fixed">固定費（レシピ全体）</option>
+                            <option value="per_unit">個数あたり</option>
+                            <option value="per_time">時間あたり（分単位）</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">金額 <span class="text-danger">*</span></label>
+                        <input type="number" name="amount" class="form-control" step="0.01" placeholder="0.00" required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">説明（オプション）</label>
+                        <input type="text" name="description" class="form-control" placeholder="メモ">
+                    </div>
+
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 原価項目一覧 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-list-ul"></i> 登録済み原価項目</h5>
+        </div>
+        <div class="card-body">
+            {% if items %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">状態</th>
+                                <th>項目名</th>
+                                <th>計算方法</th>
+                                <th>金額</th>
+                                <th>説明</th>
+                                <th style="width: 200px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsList">
+                            {% for item in items %}
+                                <tr data-id="{{ item.id }}">
+                                    <td class="text-center">
+                                        <form method="POST" action="{{ url_for('custom_costs.toggle', id=item.id) }}" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-{{ 'success' if item.is_active else 'secondary' }}"
+                                                    title="{{ '有効' if item.is_active else '無効' }}">
+                                                <i class="bi bi-{{ 'check-circle-fill' if item.is_active else 'circle' }}"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <strong>{{ item.name }}</strong>
+                                        {% if not item.is_active %}
+                                            <span class="badge bg-secondary">無効</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.calculation_type == 'fixed' %}
+                                            <span class="badge bg-info">固定費</span>
+                                        {% elif item.calculation_type == 'per_unit' %}
+                                            <span class="badge bg-warning">個数あたり</span>
+                                        {% elif item.calculation_type == 'per_time' %}
+                                            <span class="badge bg-primary">時間あたり</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ "%.2f"|format(item.amount) }}円
+                                        {% if item.calculation_type == 'per_unit' %}
+                                            / 個
+                                        {% elif item.calculation_type == 'per_time' %}
+                                            / 分
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ item.description or '-' }}</small>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary edit-btn"
+                                                data-id="{{ item.id }}"
+                                                data-name="{{ item.name }}"
+                                                data-type="{{ item.calculation_type }}"
+                                                data-amount="{{ item.amount }}"
+                                                data-description="{{ item.description or '' }}">
+                                            <i class="bi bi-pencil"></i> 編集
+                                        </button>
+                                        <form method="POST" action="{{ url_for('custom_costs.delete', id=item.id) }}"
+                                              class="d-inline"
+                                              onsubmit="return confirm('この項目を削除してよろしいですか？');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-light mt-3">
+                    <small>
+                        <i class="bi bi-lightbulb"></i>
+                        <strong>ヒント:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><strong>固定費</strong>: レシピ全体に対して一定額を加算（例: 包装材料費50円）</li>
+                            <li><strong>個数あたり</strong>: 製造個数 × 単価で計算（例: 袋代10円/個 × 10個 = 100円）</li>
+                            <li><strong>時間あたり</strong>: 製造時間(分) × 分単価で計算（例: 家賃按分2円/分 × 180分 = 360円）</li>
+                        </ul>
+                    </small>
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                    <p class="mt-3">カスタム原価項目がまだ登録されていません</p>
+                    <p>上のフォームから原価項目を追加してください</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ url_for('main.settings') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> 設定に戻る
+        </a>
+    </div>
+</div>
+
+<!-- 編集モーダル -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="editForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">原価項目の編集</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">項目名 <span class="text-danger">*</span></label>
+                        <input type="text" name="name" id="edit_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">計算方法 <span class="text-danger">*</span></label>
+                        <select name="calculation_type" id="edit_type" class="form-select" required>
+                            <option value="fixed">固定費（レシピ全体）</option>
+                            <option value="per_unit">個数あたり</option>
+                            <option value="per_time">時間あたり（分単位）</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">金額 <span class="text-danger">*</span></label>
+                        <input type="number" name="amount" id="edit_amount" class="form-control" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">説明</label>
+                        <input type="text" name="description" id="edit_description" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 編集ボタンのクリックイベント
+document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const id = this.dataset.id;
+        const name = this.dataset.name;
+        const type = this.dataset.type;
+        const amount = this.dataset.amount;
+        const description = this.dataset.description;
+
+        document.getElementById('editForm').action = `/custom-costs/${id}/update`;
+        document.getElementById('edit_name').value = name;
+        document.getElementById('edit_type').value = type;
+        document.getElementById('edit_amount').value = amount;
+        document.getElementById('edit_description').value = description;
+
+        new bootstrap.Modal(document.getElementById('editModal')).show();
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}レシピ管理{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-book"></i> レシピ管理</h2>
+        <a href="{{ url_for('recipes.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> レシピ登録
+        </a>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-5">
+                    <input type="text" name="search" class="form-control" placeholder="商品名で検索..." value="{{ search }}">
+                </div>
+                <div class="col-md-5">
+                    <select name="category" class="form-select">
+                        <option value="">すべてのカテゴリー</option>
+                        <option value="食パン" {% if category == '食パン' %}selected{% endif %}>食パン</option>
+                        <option value="菓子パン" {% if category == '菓子パン' %}selected{% endif %}>菓子パン</option>
+                        <option value="調理パン" {% if category == '調理パン' %}selected{% endif %}>調理パン</option>
+                        <option value="ハード系" {% if category == 'ハード系' %}selected{% endif %}>ハード系</option>
+                        <option value="デニッシュ" {% if category == 'デニッシュ' %}selected{% endif %}>デニッシュ</option>
+                        <option value="その他" {% if category == 'その他' %}selected{% endif %}>その他</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-secondary w-100">
+                        <i class="bi bi-search"></i> 検索
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if recipes.items %}
+        <div class="row g-3">
+            {% for recipe in recipes.items %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">{{ recipe.product_name }}</h5>
+                                <span class="badge bg-secondary">{{ recipe.category or 'なし' }}</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-box"></i> {{ recipe.recipe_ingredients|length }}種の材料
+                                    <span class="mx-1">|</span>
+                                    <i class="bi bi-123"></i> {{ recipe.production_quantity }}個製造
+                                </small>
+                            </div>
+
+                            {% if cost_setting %}
+                                <div class="border-top pt-2 mb-3">
+                                    {% set unit_cost = recipe.calculate_unit_cost(cost_setting) %}
+                                    {% set suggested_price = recipe.calculate_suggested_price(cost_setting) %}
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">原価/個:</span>
+                                        <strong>{{ "%.0f"|format(unit_cost) }}円</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">推奨価格:</span>
+                                        <strong class="text-success">{{ "%.0f"|format(suggested_price) }}円</strong>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-between">
+                            <a href="{{ url_for('recipes.detail', id=recipe.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> 詳細
+                            </a>
+                            <a href="{{ url_for('labels.preview', id=recipe.id) }}" class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-file-earmark-pdf"></i> ラベル
+                            </a>
+                            <a href="{{ url_for('recipes.edit', id=recipe.id) }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i> 編集
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <nav aria-label="ページネーション" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if recipes.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('recipes.index', page=recipes.prev_num, search=search, category=category) }}">前へ</a>
+                    </li>
+                {% endif %}
+
+                {% for page_num in recipes.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num == recipes.page %}
+                            <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('recipes.index', page=page_num, search=search, category=category) }}">{{ page_num }}</a>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if recipes.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('recipes.index', page=recipes.next_num, search=search, category=category) }}">次へ</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5 text-muted">
+                <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                <p class="mt-3">レシピが登録されていません</p>
+                <a href="{{ url_for('recipes.create') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> 最初のレシピを登録
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

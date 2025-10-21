@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}材料設定 - {{ recipe.product_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h4><i class="bi bi-box"></i> 材料設定: {{ recipe.product_name }}</h4>
+        </div>
+        <div class="card-body">
+            {% if not ingredients %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> 材料が登録されていません。
+                    <a href="{{ url_for('ingredients.create') }}" class="alert-link">材料を登録</a>してください。
+                </div>
+            {% else %}
+                <form method="POST" id="ingredientsForm">
+                    <div id="ingredientsList">
+                        {% for ri in recipe.recipe_ingredients %}
+                            <div class="row mb-3 ingredient-row">
+                                <div class="col-md-6">
+                                    <label class="form-label">材料</label>
+                                    <select name="ingredient_id[]" class="form-select" required>
+                                        <option value="">選択してください</option>
+                                        {% for ing in ingredients %}
+                                            <option value="{{ ing.id }}" {% if ing.id == ri.ingredient.id %}selected{% endif %}>
+                                                {{ ing.name }} ({{ "%.2f"|format(ing.unit_price) }}円/{{ ing.unit }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">使用量</label>
+                                    <input type="number" name="quantity[]" class="form-control" step="0.001" value="{{ ri.quantity }}" required>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button type="button" class="btn btn-danger remove-ingredient">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <button type="button" class="btn btn-secondary mb-3" id="addIngredient">
+                        <i class="bi bi-plus-lg"></i> 材料を追加
+                    </button>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('recipes.index') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> レシピ一覧へ
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> 保存
+                        </button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<template id="ingredientRowTemplate">
+    <div class="row mb-3 ingredient-row">
+        <div class="col-md-6">
+            <label class="form-label">材料</label>
+            <select name="ingredient_id[]" class="form-select" required>
+                <option value="">選択してください</option>
+                {% for ing in ingredients %}
+                    <option value="{{ ing.id }}">
+                        {{ ing.name }} ({{ "%.2f"|format(ing.unit_price) }}円/{{ ing.unit }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">使用量</label>
+            <input type="number" name="quantity[]" class="form-control" step="0.001" required>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="button" class="btn btn-danger remove-ingredient">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('addIngredient').addEventListener('click', function() {
+    const template = document.getElementById('ingredientRowTemplate');
+    const clone = template.content.cloneNode(true);
+    document.getElementById('ingredientsList').appendChild(clone);
+});
+
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.remove-ingredient')) {
+        const row = e.target.closest('.ingredient-row');
+        if (document.querySelectorAll('.ingredient-row').length > 1) {
+            row.remove();
+        } else {
+            alert('少なくとも1つの材料が必要です');
+        }
+    }
+});
+</script>
+{% endblock %}

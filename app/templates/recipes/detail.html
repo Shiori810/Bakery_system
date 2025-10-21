@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}{{ recipe.product_name }} - レシピ詳細{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-book"></i> {{ recipe.product_name }}</h2>
+        <div>
+            <a href="{{ url_for('labels.preview', id=recipe.id) }}" class="btn btn-success">
+                <i class="bi bi-file-earmark-pdf"></i> ラベル作成
+            </a>
+            <a href="{{ url_for('recipes.edit', id=recipe.id) }}" class="btn btn-primary">
+                <i class="bi bi-pencil"></i> 編集
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle"></i> 基本情報</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th style="width: 150px;">商品名</th>
+                            <td>{{ recipe.product_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>カテゴリー</th>
+                            <td><span class="badge bg-secondary">{{ recipe.category or 'なし' }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>製造個数</th>
+                            <td>{{ recipe.production_quantity }}個</td>
+                        </tr>
+                        <tr>
+                            <th>製造時間</th>
+                            <td>{{ recipe.production_time }}分</td>
+                        </tr>
+                        {% if recipe.shelf_life_days %}
+                        <tr>
+                            <th>賞味期限</th>
+                            <td>{{ recipe.shelf_life_days }}日</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th>登録日</th>
+                            <td>{{ recipe.created_at.strftime('%Y年%m月%d日') }}</td>
+                        </tr>
+                        <tr>
+                            <th>更新日</th>
+                            <td>{{ recipe.updated_at.strftime('%Y年%m月%d日') }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="bi bi-box"></i> 使用材料</h5>
+                    <a href="{{ url_for('recipes.edit_ingredients', id=recipe.id) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil"></i> 材料編集
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recipe.recipe_ingredients %}
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>材料名</th>
+                                    <th class="text-end">使用量</th>
+                                    <th class="text-end">単価</th>
+                                    <th class="text-end">金額</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ri in recipe.recipe_ingredients %}
+                                    <tr>
+                                        <td>
+                                            {{ ri.ingredient.name }}
+                                            {% if ri.ingredient.is_allergen %}
+                                                <span class="badge bg-warning text-dark ms-1">{{ ri.ingredient.allergen_type }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end">{{ ri.quantity }} {{ ri.ingredient.unit }}</td>
+                                        <td class="text-end">{{ "%.2f"|format(ri.ingredient.unit_price) }}円</td>
+                                        <td class="text-end">{{ "%.2f"|format(ri.quantity * ri.ingredient.unit_price) }}円</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-muted text-center py-3">
+                            材料が設定されていません<br>
+                            <a href="{{ url_for('recipes.edit_ingredients', id=recipe.id) }}" class="btn btn-sm btn-primary mt-2">
+                                材料を設定
+                            </a>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="bi bi-calculator"></i> 原価計算</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>材料費</span>
+                            <strong>{{ "%.2f"|format(material_cost) }}円</strong>
+                        </div>
+
+                        {% if cost_setting %}
+                            {% if cost_setting.include_labor_cost and recipe.production_time > 0 %}
+                                {% set labor_cost = (cost_setting.hourly_wage * recipe.production_time / 60)|float %}
+                                <div class="d-flex justify-content-between mb-2 text-muted">
+                                    <small>+ 人件費</small>
+                                    <small>{{ "%.2f"|format(labor_cost) }}円</small>
+                                </div>
+                            {% endif %}
+
+                            {% if cost_setting.include_utility_cost and recipe.production_time > 0 %}
+                                {% set utility_cost = (cost_setting.monthly_utility_cost / 30 / 24 * recipe.production_time / 60)|float %}
+                                <div class="d-flex justify-content-between mb-2 text-muted">
+                                    <small>+ 光熱費</small>
+                                    <small>{{ "%.2f"|format(utility_cost) }}円</small>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if custom_cost_items %}
+                            {% for item in custom_cost_items %}
+                                {% set item_cost = item.calculate_cost(recipe) %}
+                                <div class="d-flex justify-content-between mb-2 text-muted">
+                                    <small>
+                                        + {{ item.name }}
+                                        {% if item.calculation_type == 'per_unit' %}
+                                            ({{ "%.2f"|format(item.amount) }}円 × {{ recipe.production_quantity }}個)
+                                        {% elif item.calculation_type == 'per_time' %}
+                                            ({{ "%.2f"|format(item.amount) }}円 × {{ recipe.production_time }}分)
+                                        {% endif %}
+                                    </small>
+                                    <small>{{ "%.2f"|format(item_cost) }}円</small>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>総原価</strong>
+                            <strong class="text-primary">{{ "%.2f"|format(total_cost) }}円</strong>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>1個あたりの原価</strong>
+                            <strong class="text-primary fs-4">{{ "%.0f"|format(unit_cost) }}円</strong>
+                        </div>
+
+                        {% if cost_setting and cost_setting.profit_margin > 0 %}
+                            <div class="alert alert-success mb-0">
+                                <div class="d-flex justify-content-between">
+                                    <span>販売推奨価格</span>
+                                    <strong class="fs-5">{{ "%.0f"|format(suggested_price) }}円</strong>
+                                </div>
+                                <small class="text-muted">利益率 {{ cost_setting.profit_margin }}%</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-gear"></i> 操作</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('recipes.edit', id=recipe.id) }}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil"></i> レシピ情報編集
+                        </a>
+                        <a href="{{ url_for('recipes.edit_ingredients', id=recipe.id) }}" class="btn btn-outline-primary">
+                            <i class="bi bi-box"></i> 材料編集
+                        </a>
+                        <a href="{{ url_for('labels.preview', id=recipe.id) }}" class="btn btn-outline-success">
+                            <i class="bi bi-file-earmark-pdf"></i> ラベル作成
+                        </a>
+                        <hr>
+                        <form method="POST" action="{{ url_for('recipes.delete', id=recipe.id) }}" onsubmit="return confirm('このレシピを削除してよろしいですか?');">
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-trash"></i> レシピを削除
+                            </button>
+                        </form>
+                        <a href="{{ url_for('recipes.index') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> レシピ一覧へ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
