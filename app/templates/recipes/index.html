@@ -60,12 +60,18 @@
                                 <div class="border-top pt-2 mb-3">
                                     {% set unit_cost = recipe.calculate_unit_cost(cost_setting) %}
                                     {% set suggested_price = recipe.calculate_suggested_price(cost_setting) %}
+                                    {% set profit_margin = recipe.get_profit_margin(cost_setting) %}
                                     <div class="d-flex justify-content-between">
                                         <span class="text-muted">原価/個:</span>
                                         <strong>{{ "%.0f"|format(unit_cost) }}円</strong>
                                     </div>
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-muted">推奨価格:</span>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">
+                                            推奨価格:
+                                            {% if recipe.custom_profit_margin is not none %}
+                                                <span class="badge bg-info" style="font-size: 0.65rem;">{{ profit_margin }}%</span>
+                                            {% endif %}
+                                        </span>
                                         <strong class="text-success">{{ "%.0f"|format(suggested_price) }}円</strong>
                                     </div>
                                 </div>

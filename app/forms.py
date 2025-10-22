@@ -111,6 +111,10 @@ class RecipeForm(FlaskForm):
         Optional(),
         NumberRange(min=0, message='賞味期限は0以上で入力してください')
     ])
+    custom_profit_margin = DecimalField('商品ごとの利益率(%)', validators=[
+        Optional(),
+        NumberRange(min=0, max=100, message='利益率は0〜100で入力してください')
+    ], places=2)
 
 
 class CostSettingForm(FlaskForm):

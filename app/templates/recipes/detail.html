@@ -163,13 +163,21 @@
                             <strong class="text-primary fs-4">{{ "%.0f"|format(unit_cost) }}円</strong>
                         </div>
 
-                        {% if cost_setting and cost_setting.profit_margin > 0 %}
+                        {% set profit_margin = recipe.get_profit_margin(cost_setting) %}
+                        {% if profit_margin > 0 %}
                             <div class="alert alert-success mb-0">
                                 <div class="d-flex justify-content-between">
                                     <span>販売推奨価格</span>
                                     <strong class="fs-5">{{ "%.0f"|format(suggested_price) }}円</strong>
                                 </div>
-                                <small class="text-muted">利益率 {{ cost_setting.profit_margin }}%</small>
+                                <small class="text-muted">
+                                    利益率 {{ profit_margin }}%
+                                    {% if recipe.custom_profit_margin is not none %}
+                                        <span class="badge bg-info">商品設定</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">基本設定</span>
+                                    {% endif %}
+                                </small>
                             </div>
                         {% endif %}
                     </div>
