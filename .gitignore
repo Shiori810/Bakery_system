@@ -38,7 +38,7 @@ instance/
 *.sqlite3
 
 # IDE
-.vscode/
+# .vscode/ は共同開発設定として含める
 .idea/
 *.swp
 *.swo
