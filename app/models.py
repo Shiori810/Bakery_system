@@ -59,8 +59,19 @@ class Ingredient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     store_id = db.Column(db.Integer, db.ForeignKey('stores.id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
-    unit_price = db.Column(db.Numeric(10, 2), nullable=False)  # 単価
-    unit = db.Column(db.String(20), nullable=False)  # 単位(g, kg, ml, L, 個など)
+
+    # 購入情報
+    purchase_price = db.Column(db.Numeric(10, 2), nullable=False)  # 購入価格
+    purchase_quantity = db.Column(db.Numeric(10, 3), nullable=False, default=1)  # 購入数量
+    purchase_unit = db.Column(db.String(20), nullable=False)  # 購入単位(kg, L, 個など)
+
+    # 使用情報
+    usage_unit = db.Column(db.String(20), nullable=False)  # 使用単位(g, ml, 個など)
+
+    # 後方互換性のための計算フィールド（非推奨）
+    unit_price = db.Column(db.Numeric(10, 2))  # 旧単価フィールド
+    unit = db.Column(db.String(20))  # 旧単位フィールド
+
     supplier = db.Column(db.String(100))  # 仕入先(オプション)
     is_allergen = db.Column(db.Boolean, default=False)  # アレルゲンフラグ
     allergen_type = db.Column(db.String(50))  # アレルゲン種類(小麦、卵、乳など)
@@ -69,6 +80,69 @@ class Ingredient(db.Model):
 
     # リレーション
     recipe_ingredients = db.relationship('RecipeIngredient', backref='ingredient', lazy=True, cascade='all, delete-orphan')
+
+    def get_usage_unit_price(self):
+        """使用単位あたりの単価を計算"""
+        if not self.purchase_quantity or self.purchase_quantity == 0:
+            return 0
+
+        # 購入単位を使用単位に換算
+        conversion_factor = self._get_conversion_factor(self.purchase_unit, self.usage_unit)
+
+        # 購入単位あたりの価格
+        price_per_purchase_unit = float(self.purchase_price) / float(self.purchase_quantity)
+
+        # 使用単位あたりの価格
+        usage_unit_price = price_per_purchase_unit / conversion_factor
+
+        return usage_unit_price
+
+    @staticmethod
+    def _get_conversion_factor(from_unit, to_unit):
+        """
+        単位変換係数を取得
+        例: kg -> g なら 1000, L -> ml なら 1000
+        """
+        # 単位を小文字に統一
+        from_unit = from_unit.lower()
+        to_unit = to_unit.lower()
+
+        # 同じ単位の場合
+        if from_unit == to_unit:
+            return 1.0
+
+        # 重量変換
+        weight_conversions = {
+            ('kg', 'g'): 1000,
+            ('g', 'kg'): 0.001,
+            ('kg', 'kg'): 1,
+            ('g', 'g'): 1,
+        }
+
+        # 容量変換
+        volume_conversions = {
+            ('l', 'ml'): 1000,
+            ('ml', 'l'): 0.001,
+            ('l', 'l'): 1,
+            ('ml', 'ml'): 1,
+        }
+
+        # 個数（変換なし）
+        count_units = {'個', '枚', '本', 'ヶ', 'コ'}
+        if from_unit in count_units and to_unit in count_units:
+            return 1.0
+
+        # 変換テーブルから検索
+        conversion_key = (from_unit, to_unit)
+
+        if conversion_key in weight_conversions:
+            return weight_conversions[conversion_key]
+
+        if conversion_key in volume_conversions:
+            return volume_conversions[conversion_key]
+
+        # 変換できない場合は1.0を返す（同じ単位として扱う）
+        return 1.0
 
     def __repr__(self):
         return f'<Ingredient {self.name}>'
@@ -96,10 +170,8 @@ class Recipe(db.Model):
         """材料費の計算"""
         total_cost = 0
         for ri in self.recipe_ingredients:
-            # 単位変換を考慮した計算
-            quantity = self._convert_to_base_unit(ri.quantity, ri.ingredient.unit)
-            unit_price = self._convert_to_base_unit(ri.ingredient.unit_price, ri.ingredient.unit)
-            total_cost += quantity * unit_price
+            # RecipeIngredientのcalculate_costメソッドを使用
+            total_cost += ri.calculate_cost()
         return float(total_cost)
 
     def calculate_total_cost(self, cost_setting=None):
@@ -164,19 +236,6 @@ class Recipe(db.Model):
                     allergens.append(ri.ingredient.allergen_type)
         return allergens
 
-    @staticmethod
-    def _convert_to_base_unit(value, unit):
-        """単位を基本単位に変換(簡易版)"""
-        # kg -> g, L -> ml の変換
-        conversion_factors = {
-            'kg': 1000,
-            'l': 1000,
-            'L': 1000,
-        }
-
-        if unit in conversion_factors:
-            return float(value) / conversion_factors[unit]
-        return float(value)
 
     def __repr__(self):
         return f'<Recipe {self.product_name}>'
@@ -189,7 +248,12 @@ class RecipeIngredient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
     ingredient_id = db.Column(db.Integer, db.ForeignKey('ingredients.id'), nullable=False)
-    quantity = db.Column(db.Numeric(10, 3), nullable=False)  # 使用量
+    quantity = db.Column(db.Numeric(10, 3), nullable=False)  # 使用量（使用単位での数量）
+
+    def calculate_cost(self):
+        """この材料の使用コストを計算"""
+        usage_unit_price = self.ingredient.get_usage_unit_price()
+        return float(self.quantity) * usage_unit_price
 
     def __repr__(self):
         return f'<RecipeIngredient recipe_id={self.recipe_id} ingredient_id={self.ingredient_id}>'

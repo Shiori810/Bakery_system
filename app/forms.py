@@ -46,18 +46,37 @@ class IngredientForm(FlaskForm):
         DataRequired(message='材料名は必須です'),
         Length(max=100, message='材料名は100文字以内で入力してください')
     ])
-    unit_price = DecimalField('単価', validators=[
-        DataRequired(message='単価は必須です'),
-        NumberRange(min=0, message='単価は0以上で入力してください')
+
+    # 購入情報
+    purchase_price = DecimalField('購入価格', validators=[
+        DataRequired(message='購入価格は必須です'),
+        NumberRange(min=0, message='購入価格は0以上で入力してください')
     ], places=2)
-    unit = SelectField('単位', choices=[
+    purchase_quantity = DecimalField('購入数量', validators=[
+        DataRequired(message='購入数量は必須です'),
+        NumberRange(min=0.001, message='購入数量は0より大きい値で入力してください')
+    ], places=3, default=1)
+    purchase_unit = SelectField('購入単位', choices=[
+        ('kg', 'kg'),
+        ('g', 'g'),
+        ('L', 'L'),
+        ('ml', 'ml'),
+        ('個', '個'),
+        ('枚', '枚'),
+        ('本', '本')
+    ], validators=[DataRequired(message='購入単位は必須です')])
+
+    # 使用情報
+    usage_unit = SelectField('使用単位', choices=[
         ('g', 'g'),
         ('kg', 'kg'),
         ('ml', 'ml'),
         ('L', 'L'),
         ('個', '個'),
-        ('枚', '枚')
-    ], validators=[DataRequired(message='単位は必須です')])
+        ('枚', '枚'),
+        ('本', '本')
+    ], validators=[DataRequired(message='使用単位は必須です')])
+
     supplier = StringField('仕入先', validators=[
         Optional(),
         Length(max=100, message='仕入先は100文字以内で入力してください')

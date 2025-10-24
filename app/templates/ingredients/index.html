@@ -34,8 +34,8 @@
                         <thead>
                             <tr>
                                 <th>材料名</th>
-                                <th>単価</th>
-                                <th>単位</th>
+                                <th>購入情報</th>
+                                <th>使用単位あたり単価</th>
                                 <th>仕入先</th>
                                 <th>アレルゲン</th>
                                 <th>登録日</th>
@@ -46,8 +46,20 @@
                             {% for ingredient in ingredients.items %}
                                 <tr>
                                     <td><strong>{{ ingredient.name }}</strong></td>
-                                    <td>{{ "%.2f"|format(ingredient.unit_price) }}円</td>
-                                    <td>{{ ingredient.unit }}</td>
+                                    <td>
+                                        {% if ingredient.purchase_price %}
+                                            {{ "%.2f"|format(ingredient.purchase_price) }}円 / {{ "%.3f"|format(ingredient.purchase_quantity) }}{{ ingredient.purchase_unit }}
+                                        {% else %}
+                                            <span class="text-muted">旧形式</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if ingredient.usage_unit %}
+                                            {{ "%.2f"|format(ingredient.get_usage_unit_price()) }}円/{{ ingredient.usage_unit }}
+                                        {% else %}
+                                            {{ "%.2f"|format(ingredient.unit_price) }}円/{{ ingredient.unit }}
+                                        {% endif %}
+                                    </td>
                                     <td>{{ ingredient.supplier or '-' }}</td>
                                     <td>
                                         {% if ingredient.is_allergen %}

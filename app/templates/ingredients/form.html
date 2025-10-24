@@ -14,44 +14,79 @@
                     <form method="POST" novalidate>
                         {{ form.hidden_tag() }}
 
-                        <div class="row mb-3">
-                            <div class="col-md-8">
-                                {{ form.name.label(class="form-label required") }}
-                                {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
-                                {% if form.name.errors %}
-                                    <div class="invalid-feedback">{{ form.name.errors[0] }}</div>
-                                {% endif %}
-                            </div>
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label required") }}
+                            {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback">{{ form.name.errors[0] }}</div>
+                            {% endif %}
+                        </div>
 
-                            <div class="col-md-4">
-                                {{ form.unit.label(class="form-label required") }}
-                                {{ form.unit(class="form-select" + (" is-invalid" if form.unit.errors else "")) }}
-                                {% if form.unit.errors %}
-                                    <div class="invalid-feedback">{{ form.unit.errors[0] }}</div>
-                                {% endif %}
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">購入情報</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        {{ form.purchase_price.label(class="form-label required") }}
+                                        <div class="input-group">
+                                            {{ form.purchase_price(class="form-control" + (" is-invalid" if form.purchase_price.errors else "")) }}
+                                            <span class="input-group-text">円</span>
+                                        </div>
+                                        {% if form.purchase_price.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.purchase_price.errors[0] }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        {{ form.purchase_quantity.label(class="form-label required") }}
+                                        {{ form.purchase_quantity(class="form-control" + (" is-invalid" if form.purchase_quantity.errors else "")) }}
+                                        {% if form.purchase_quantity.errors %}
+                                            <div class="invalid-feedback">{{ form.purchase_quantity.errors[0] }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        {{ form.purchase_unit.label(class="form-label required") }}
+                                        {{ form.purchase_unit(class="form-select" + (" is-invalid" if form.purchase_unit.errors else "")) }}
+                                        {% if form.purchase_unit.errors %}
+                                            <div class="invalid-feedback">{{ form.purchase_unit.errors[0] }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="alert alert-info mb-0">
+                                    <small><i class="bi bi-info-circle"></i> 例: 小麦粉を1kg袋で500円で購入する場合 → 購入価格:500円、購入数量:1、購入単位:kg</small>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                {{ form.unit_price.label(class="form-label required") }}
-                                <div class="input-group">
-                                    {{ form.unit_price(class="form-control" + (" is-invalid" if form.unit_price.errors else "")) }}
-                                    <span class="input-group-text">円</span>
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">使用情報</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        {{ form.usage_unit.label(class="form-label required") }}
+                                        {{ form.usage_unit(class="form-select" + (" is-invalid" if form.usage_unit.errors else "")) }}
+                                        {% if form.usage_unit.errors %}
+                                            <div class="invalid-feedback">{{ form.usage_unit.errors[0] }}</div>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                {% if form.unit_price.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.unit_price.errors[0] }}</div>
-                                {% endif %}
-                                <small class="form-text text-muted">選択した単位あたりの単価</small>
+                                <div class="alert alert-info mb-0">
+                                    <small><i class="bi bi-info-circle"></i> レシピで使用する際の単位を指定します。例: 小麦粉の場合、購入単位がkgでも使用単位をgに設定できます</small>
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="col-md-6">
-                                {{ form.supplier.label(class="form-label") }}
-                                {{ form.supplier(class="form-control" + (" is-invalid" if form.supplier.errors else "")) }}
-                                {% if form.supplier.errors %}
-                                    <div class="invalid-feedback">{{ form.supplier.errors[0] }}</div>
-                                {% endif %}
-                            </div>
+                        <div class="mb-3">
+                            {{ form.supplier.label(class="form-label") }}
+                            {{ form.supplier(class="form-control" + (" is-invalid" if form.supplier.errors else "")) }}
+                            {% if form.supplier.errors %}
+                                <div class="invalid-feedback">{{ form.supplier.errors[0] }}</div>
+                            {% endif %}
                         </div>
 
                         <div class="mb-3">

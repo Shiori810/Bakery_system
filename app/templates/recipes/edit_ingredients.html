@@ -19,20 +19,28 @@
                     <div id="ingredientsList">
                         {% for ri in recipe.recipe_ingredients %}
                             <div class="row mb-3 ingredient-row">
-                                <div class="col-md-6">
+                                <div class="col-md-5">
                                     <label class="form-label">材料</label>
                                     <select name="ingredient_id[]" class="form-select" required>
                                         <option value="">選択してください</option>
                                         {% for ing in ingredients %}
                                             <option value="{{ ing.id }}" {% if ing.id == ri.ingredient.id %}selected{% endif %}>
-                                                {{ ing.name }} ({{ "%.2f"|format(ing.unit_price) }}円/{{ ing.unit }})
+                                                {% if ing.usage_unit %}
+                                                    {{ ing.name }} ({{ "%.2f"|format(ing.get_usage_unit_price()) }}円/{{ ing.usage_unit }})
+                                                {% else %}
+                                                    {{ ing.name }} ({{ "%.2f"|format(ing.unit_price) }}円/{{ ing.unit }})
+                                                {% endif %}
                                             </option>
                                         {% endfor %}
                                     </select>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label class="form-label">使用量</label>
                                     <input type="number" name="quantity[]" class="form-control" step="0.001" value="{{ ri.quantity }}" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">単位</label>
+                                    <input type="text" class="form-control" value="{{ ri.ingredient.usage_unit or ri.ingredient.unit }}" readonly>
                                 </div>
                                 <div class="col-md-2 d-flex align-items-end">
                                     <button type="button" class="btn btn-danger remove-ingredient">
@@ -63,20 +71,28 @@
 
 <template id="ingredientRowTemplate">
     <div class="row mb-3 ingredient-row">
-        <div class="col-md-6">
+        <div class="col-md-5">
             <label class="form-label">材料</label>
-            <select name="ingredient_id[]" class="form-select" required>
+            <select name="ingredient_id[]" class="form-select ingredient-select" required>
                 <option value="">選択してください</option>
                 {% for ing in ingredients %}
-                    <option value="{{ ing.id }}">
-                        {{ ing.name }} ({{ "%.2f"|format(ing.unit_price) }}円/{{ ing.unit }})
+                    <option value="{{ ing.id }}" data-unit="{{ ing.usage_unit or ing.unit }}">
+                        {% if ing.usage_unit %}
+                            {{ ing.name }} ({{ "%.2f"|format(ing.get_usage_unit_price()) }}円/{{ ing.usage_unit }})
+                        {% else %}
+                            {{ ing.name }} ({{ "%.2f"|format(ing.unit_price) }}円/{{ ing.unit }})
+                        {% endif %}
                     </option>
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label class="form-label">使用量</label>
             <input type="number" name="quantity[]" class="form-control" step="0.001" required>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">単位</label>
+            <input type="text" class="form-control unit-display" readonly>
         </div>
         <div class="col-md-2 d-flex align-items-end">
             <button type="button" class="btn btn-danger remove-ingredient">
@@ -102,6 +118,19 @@ document.addEventListener('click', function(e) {
             row.remove();
         } else {
             alert('少なくとも1つの材料が必要です');
+        }
+    }
+});
+
+// 材料選択時に単位を表示
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('ingredient-select')) {
+        const selectedOption = e.target.options[e.target.selectedIndex];
+        const unit = selectedOption.getAttribute('data-unit');
+        const row = e.target.closest('.ingredient-row');
+        const unitDisplay = row.querySelector('.unit-display');
+        if (unitDisplay) {
+            unitDisplay.value = unit || '';
         }
     }
 });
