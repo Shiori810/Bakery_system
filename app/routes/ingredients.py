@@ -36,10 +36,10 @@ def create():
         ingredient = Ingredient(
             store_id=current_user.id,
             name=form.name.data,
-            purchase_price=form.purchase_price.data,
-            purchase_quantity=form.purchase_quantity.data,
-            purchase_unit=form.purchase_unit.data,
-            usage_unit=form.usage_unit.data,
+            purchase_price=form.purchase_price.data if form.purchase_price.data else None,
+            purchase_quantity=form.purchase_quantity.data if form.purchase_quantity.data else 1,
+            purchase_unit=form.purchase_unit.data if form.purchase_unit.data else None,
+            usage_unit=form.usage_unit.data if form.usage_unit.data else None,
             supplier=form.supplier.data,
             is_allergen=form.is_allergen.data,
             allergen_type=form.allergen_type.data if form.is_allergen.data else None

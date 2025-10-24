@@ -61,12 +61,12 @@ class Ingredient(db.Model):
     name = db.Column(db.String(100), nullable=False)
 
     # 購入情報
-    purchase_price = db.Column(db.Numeric(10, 2), nullable=False)  # 購入価格
-    purchase_quantity = db.Column(db.Numeric(10, 3), nullable=False, default=1)  # 購入数量
-    purchase_unit = db.Column(db.String(20), nullable=False)  # 購入単位(kg, L, 個など)
+    purchase_price = db.Column(db.Numeric(10, 2))  # 購入価格
+    purchase_quantity = db.Column(db.Numeric(10, 3), default=1)  # 購入数量
+    purchase_unit = db.Column(db.String(20))  # 購入単位(kg, L, 個など)
 
     # 使用情報
-    usage_unit = db.Column(db.String(20), nullable=False)  # 使用単位(g, ml, 個など)
+    usage_unit = db.Column(db.String(20))  # 使用単位(g, ml, 個など)
 
     # 後方互換性のための計算フィールド（非推奨）
     unit_price = db.Column(db.Numeric(10, 2))  # 旧単価フィールド
@@ -83,19 +83,27 @@ class Ingredient(db.Model):
 
     def get_usage_unit_price(self):
         """使用単位あたりの単価を計算"""
-        if not self.purchase_quantity or self.purchase_quantity == 0:
-            return 0
+        # 新しいフィールドが存在する場合
+        if self.purchase_price is not None and self.purchase_quantity and self.purchase_unit and self.usage_unit:
+            if self.purchase_quantity == 0:
+                return 0
 
-        # 購入単位を使用単位に換算
-        conversion_factor = self._get_conversion_factor(self.purchase_unit, self.usage_unit)
+            # 購入単位を使用単位に換算
+            conversion_factor = self._get_conversion_factor(self.purchase_unit, self.usage_unit)
 
-        # 購入単位あたりの価格
-        price_per_purchase_unit = float(self.purchase_price) / float(self.purchase_quantity)
+            # 購入単位あたりの価格
+            price_per_purchase_unit = float(self.purchase_price) / float(self.purchase_quantity)
 
-        # 使用単位あたりの価格
-        usage_unit_price = price_per_purchase_unit / conversion_factor
+            # 使用単位あたりの価格
+            usage_unit_price = price_per_purchase_unit / conversion_factor
 
-        return usage_unit_price
+            return usage_unit_price
+
+        # 後方互換性: 旧フィールドを使用
+        elif self.unit_price is not None:
+            return float(self.unit_price)
+
+        return 0
 
     @staticmethod
     def _get_conversion_factor(from_unit, to_unit):
