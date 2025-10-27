@@ -48,7 +48,9 @@ def create():
             category=form.category.data,
             production_quantity=form.production_quantity.data,
             production_time=form.production_time.data,
-            shelf_life_days=form.shelf_life_days.data
+            shelf_life_days=form.shelf_life_days.data,
+            custom_profit_margin=form.custom_profit_margin.data,
+            selling_price=form.selling_price.data
         )
 
         db.session.add(recipe)
@@ -94,7 +96,7 @@ def detail(id):
     material_cost = recipe.calculate_material_cost()
     total_cost = recipe.calculate_total_cost(cost_setting)
     unit_cost = recipe.calculate_unit_cost(cost_setting)
-    suggested_price = recipe.calculate_suggested_price(cost_setting) if cost_setting else unit_cost
+    suggested_price = recipe.get_selling_price(cost_setting) if cost_setting else unit_cost
 
     # カスタム原価項目の取得
     custom_cost_items = CustomCostItem.query.filter_by(

@@ -13,6 +13,59 @@
                 <div class="card-body">
                     <form method="POST" action="{{ url_for('labels.generate', id=recipe.id) }}">
                         <div class="mb-3">
+                            <label class="form-label">ラベル用紙</label>
+                            <select name="label_preset" class="form-select" id="labelPreset">
+                                <option value="custom">カスタムサイズ</option>
+                                <optgroup label="A-ONE製品">
+                                    {% for key, preset in label_presets.items() %}
+                                        {% if key != 'custom' %}
+                                            <option value="{{ key }}">{{ preset.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </optgroup>
+                            </select>
+                            <small class="form-text text-muted">使用するラベル用紙を選択してください</small>
+                        </div>
+
+                        <div id="customSizeSettings" class="mb-3 border p-3 bg-light">
+                            <h6 class="mb-3">カスタムサイズ設定</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">ラベル幅 (mm)</label>
+                                    <input type="number" name="custom_width" class="form-control" value="90" step="0.1" min="10">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">ラベル高さ (mm)</label>
+                                    <input type="number" name="custom_height" class="form-control" value="60" step="0.1" min="10">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">列数</label>
+                                    <input type="number" name="custom_cols" class="form-control" value="2" min="1" max="10">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">行数</label>
+                                    <input type="number" name="custom_rows" class="form-control" value="4" min="1" max="20">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">左余白 (mm)</label>
+                                    <input type="number" name="custom_margin_left" class="form-control" value="15" step="0.1" min="0">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">上余白 (mm)</label>
+                                    <input type="number" name="custom_margin_top" class="form-control" value="20" step="0.1" min="0">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">横間隔 (mm)</label>
+                                    <input type="number" name="custom_gap_x" class="form-control" value="10" step="0.1" min="0">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">縦間隔 (mm)</label>
+                                    <input type="number" name="custom_gap_y" class="form-control" value="8" step="0.1" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label">製造日</label>
                             <input type="date" name="production_date" class="form-control" value="{{ today }}" required>
                             <small class="form-text text-muted">賞味期限の計算に使用されます</small>
@@ -21,7 +74,7 @@
                         <div class="mb-3">
                             <label class="form-label">印刷枚数</label>
                             <input type="number" name="label_count" class="form-control" value="1" min="1" max="100" required>
-                            <small class="form-text text-muted">A4用紙1枚につき8枚のラベルが印刷されます</small>
+                            <small class="form-text text-muted" id="labelCountDescription">A4用紙1枚につき8枚のラベルが印刷されます</small>
                         </div>
 
                         <div class="mb-3">
@@ -117,5 +170,49 @@
 <script>
 // 今日の日付をデフォルトで設定
 document.querySelector('input[name="production_date"]').valueAsDate = new Date();
+
+// ラベルプリセットのデータ
+const labelPresets = {{ label_presets|tojson|safe }};
+
+// プリセット選択時の処理
+document.getElementById('labelPreset').addEventListener('change', function() {
+    const presetKey = this.value;
+    const customSettings = document.getElementById('customSizeSettings');
+    const labelCountDesc = document.getElementById('labelCountDescription');
+
+    if (presetKey === 'custom') {
+        // カスタムサイズの場合、設定欄を表示
+        customSettings.style.display = 'block';
+
+        // デフォルト値で計算
+        const cols = parseInt(document.querySelector('input[name="custom_cols"]').value) || 2;
+        const rows = parseInt(document.querySelector('input[name="custom_rows"]').value) || 4;
+        const labelsPerPage = cols * rows;
+        labelCountDesc.textContent = `A4用紙1枚につき${labelsPerPage}枚のラベルが印刷されます`;
+    } else {
+        // プリセットの場合、設定欄を非表示
+        customSettings.style.display = 'none';
+
+        // プリセットの情報を表示
+        const preset = labelPresets[presetKey];
+        const labelsPerPage = preset.cols * preset.rows;
+        labelCountDesc.textContent = `A4用紙1枚につき${labelsPerPage}面のラベルが印刷されます (${preset.width}mm × ${preset.height}mm)`;
+    }
+});
+
+// カスタムサイズの列数・行数変更時の処理
+document.querySelectorAll('input[name="custom_cols"], input[name="custom_rows"]').forEach(function(input) {
+    input.addEventListener('change', function() {
+        if (document.getElementById('labelPreset').value === 'custom') {
+            const cols = parseInt(document.querySelector('input[name="custom_cols"]').value) || 2;
+            const rows = parseInt(document.querySelector('input[name="custom_rows"]').value) || 4;
+            const labelsPerPage = cols * rows;
+            document.getElementById('labelCountDescription').textContent = `A4用紙1枚につき${labelsPerPage}枚のラベルが印刷されます`;
+        }
+    });
+});
+
+// 初期状態でカスタムサイズを表示
+document.getElementById('labelPreset').dispatchEvent(new Event('change'));
 </script>
 {% endblock %}

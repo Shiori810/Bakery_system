@@ -54,11 +54,7 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if ingredient.usage_unit %}
-                                            {{ "%.2f"|format(ingredient.get_usage_unit_price()) }}円/{{ ingredient.usage_unit }}
-                                        {% else %}
-                                            {{ "%.2f"|format(ingredient.unit_price) }}円/{{ ingredient.unit }}
-                                        {% endif %}
+                                        {{ "%.2f"|format(ingredient.get_usage_unit_price()) }}円/{{ ingredient.usage_unit }}
                                     </td>
                                     <td>{{ ingredient.supplier or '-' }}</td>
                                     <td>

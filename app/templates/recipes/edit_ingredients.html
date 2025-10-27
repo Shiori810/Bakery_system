@@ -25,11 +25,7 @@
                                         <option value="">選択してください</option>
                                         {% for ing in ingredients %}
                                             <option value="{{ ing.id }}" {% if ing.id == ri.ingredient.id %}selected{% endif %}>
-                                                {% if ing.usage_unit %}
-                                                    {{ ing.name }} ({{ "%.2f"|format(ing.get_usage_unit_price()) }}円/{{ ing.usage_unit }})
-                                                {% else %}
-                                                    {{ ing.name }} ({{ "%.2f"|format(ing.unit_price) }}円/{{ ing.unit }})
-                                                {% endif %}
+                                                {{ ing.name }} ({{ "%.2f"|format(ing.get_usage_unit_price()) }}円/{{ ing.usage_unit }})
                                             </option>
                                         {% endfor %}
                                     </select>
@@ -40,7 +36,7 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">単位</label>
-                                    <input type="text" class="form-control" value="{{ ri.ingredient.usage_unit or ri.ingredient.unit }}" readonly>
+                                    <input type="text" class="form-control" value="{{ ri.ingredient.usage_unit }}" readonly>
                                 </div>
                                 <div class="col-md-2 d-flex align-items-end">
                                     <button type="button" class="btn btn-danger remove-ingredient">
@@ -76,12 +72,8 @@
             <select name="ingredient_id[]" class="form-select ingredient-select" required>
                 <option value="">選択してください</option>
                 {% for ing in ingredients %}
-                    <option value="{{ ing.id }}" data-unit="{{ ing.usage_unit or ing.unit }}">
-                        {% if ing.usage_unit %}
-                            {{ ing.name }} ({{ "%.2f"|format(ing.get_usage_unit_price()) }}円/{{ ing.usage_unit }})
-                        {% else %}
-                            {{ ing.name }} ({{ "%.2f"|format(ing.unit_price) }}円/{{ ing.unit }})
-                        {% endif %}
+                    <option value="{{ ing.id }}" data-unit="{{ ing.usage_unit }}">
+                        {{ ing.name }} ({{ "%.2f"|format(ing.get_usage_unit_price()) }}円/{{ ing.usage_unit }})
                     </option>
                 {% endfor %}
             </select>

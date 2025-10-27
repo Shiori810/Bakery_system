@@ -65,16 +65,30 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            {{ form.custom_profit_margin.label(class="form-label") }}
-                            <div class="input-group" style="max-width: 300px;">
-                                {{ form.custom_profit_margin(class="form-control" + (" is-invalid" if form.custom_profit_margin.errors else ""), placeholder="未設定の場合は基本設定の利益率を使用") }}
-                                <span class="input-group-text">%</span>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.custom_profit_margin.label(class="form-label") }}
+                                <div class="input-group">
+                                    {{ form.custom_profit_margin(class="form-control" + (" is-invalid" if form.custom_profit_margin.errors else ""), placeholder="基本設定を使用") }}
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                {% if form.custom_profit_margin.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.custom_profit_margin.errors[0] }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">この商品専用の利益率（空欄の場合は基本設定を使用）</small>
                             </div>
-                            {% if form.custom_profit_margin.errors %}
-                                <div class="invalid-feedback d-block">{{ form.custom_profit_margin.errors[0] }}</div>
-                            {% endif %}
-                            <small class="form-text text-muted">この商品専用の利益率（空欄の場合は基本設定を使用）</small>
+
+                            <div class="col-md-6">
+                                {{ form.selling_price.label(class="form-label") }}
+                                <div class="input-group">
+                                    {{ form.selling_price(class="form-control" + (" is-invalid" if form.selling_price.errors else ""), placeholder="推奨価格を使用") }}
+                                    <span class="input-group-text">円</span>
+                                </div>
+                                {% if form.selling_price.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.selling_price.errors[0] }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">手動で販売価格を設定（空欄の場合は推奨価格を使用）</small>
+                            </div>
                         </div>
 
                         <div class="d-flex justify-content-between mt-4">

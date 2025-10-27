@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}ログインID確認{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="bi bi-person-badge"></i> ログインID確認</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 店舗名を入力すると、登録されているログインIDを確認できます。
+                    </div>
+
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.store_name.label(class="form-label required") }}
+                            {{ form.store_name(class="form-control" + (" is-invalid" if form.store_name.errors else ""), autofocus=True, placeholder="例: パン工房さくら") }}
+                            {% if form.store_name.errors %}
+                                <div class="invalid-feedback">{{ form.store_name.errors[0] }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">登録時に入力した店舗名を入力してください（部分一致で検索）</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-info">
+                                <i class="bi bi-search"></i> 検索
+                            </button>
+                        </div>
+                    </form>
+
+                    {% if found_stores is not none %}
+                        <hr>
+                        {% if found_stores %}
+                            <div class="alert alert-success">
+                                <h5><i class="bi bi-check-circle"></i> 検索結果</h5>
+                                <p class="mb-2">以下の店舗が見つかりました：</p>
+                                {% for store in found_stores %}
+                                    <div class="card mb-2">
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ store.store_name }}</h6>
+                                            <p class="card-text mb-2">
+                                                <strong>ログインID:</strong>
+                                                <code class="bg-light px-2 py-1 fs-5">{{ store.login_id }}</code>
+                                            </p>
+                                            <small class="text-muted">登録日: {{ store.created_at.strftime('%Y年%m月%d日') }}</small>
+                                            <div class="mt-3">
+                                                <a href="{{ url_for('auth.reset_password') }}" class="btn btn-sm btn-warning">
+                                                    <i class="bi bi-key"></i> このIDでパスワードリセット
+                                                </a>
+                                                <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-box-arrow-in-right"></i> このIDでログイン
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle"></i> 該当する店舗が見つかりませんでした。
+                                <ul class="mb-0 mt-2">
+                                    <li>店舗名のスペルを確認してください</li>
+                                    <li>店舗名の一部でも検索できます</li>
+                                    <li>まだ登録していない場合は<a href="{{ url_for('auth.register') }}" class="alert-link">新規登録</a>してください</li>
+                                </ul>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    <hr>
+
+                    <div class="text-center">
+                        <a href="{{ url_for('auth.login') }}" class="text-decoration-none">
+                            <i class="bi bi-arrow-left"></i> ログイン画面に戻る
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3 alert alert-info">
+                <strong><i class="bi bi-lightbulb"></i> ヒント</strong>
+                <ul class="mb-0 mt-2">
+                    <li>店舗名の一部を入力しても検索できます</li>
+                    <li>複数の店舗が見つかった場合は、登録日を参考にしてください</li>
+                    <li>ログインIDが分かったら、パスワードリセットができます</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

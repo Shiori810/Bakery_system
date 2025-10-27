@@ -136,6 +136,10 @@ class RecipeForm(FlaskForm):
         Optional(),
         NumberRange(min=0, max=100, message='利益率は0〜100で入力してください')
     ], places=2)
+    selling_price = DecimalField('販売価格(円)', validators=[
+        Optional(),
+        NumberRange(min=0, message='販売価格は0以上で入力してください')
+    ], places=2)
 
 
 class CostSettingForm(FlaskForm):
@@ -168,4 +172,26 @@ class PasswordChangeForm(FlaskForm):
     confirm_password = PasswordField('新しいパスワード確認', validators=[
         DataRequired(message='新しいパスワード確認を入力してください'),
         EqualTo('new_password', message='パスワードが一致しません')
+    ])
+
+
+class PasswordResetForm(FlaskForm):
+    """パスワードリセットフォーム（ログインID確認用）"""
+    login_id = StringField('ログインID', validators=[
+        DataRequired(message='ログインIDを入力してください')
+    ])
+    new_password = PasswordField('新しいパスワード', validators=[
+        DataRequired(message='新しいパスワードを入力してください'),
+        Length(min=6, message='パスワードは6文字以上で入力してください')
+    ])
+    confirm_password = PasswordField('新しいパスワード確認', validators=[
+        DataRequired(message='新しいパスワード確認を入力してください'),
+        EqualTo('new_password', message='パスワードが一致しません')
+    ])
+
+
+class ForgotLoginIDForm(FlaskForm):
+    """ログインID確認フォーム"""
+    store_name = StringField('店舗名', validators=[
+        DataRequired(message='店舗名を入力してください')
     ])

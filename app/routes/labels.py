@@ -13,6 +13,105 @@ import os
 
 bp = Blueprint('labels', __name__, url_prefix='/labels')
 
+# A-ONE製品ラベルサイズプリセット
+LABEL_PRESETS = {
+    'custom': {
+        'name': 'カスタムサイズ',
+        'width': 90,
+        'height': 60,
+        'cols': 2,
+        'rows': 4,
+        'margin_left': 15,
+        'margin_top': 20,
+        'gap_x': 10,
+        'gap_y': 8
+    },
+    '31531': {
+        'name': 'A-ONE 31531 (12面)',
+        'product_code': '31531',
+        'width': 86.4,
+        'height': 42.3,
+        'cols': 2,
+        'rows': 6,
+        'margin_left': 11.5,
+        'margin_top': 21.0,
+        'gap_x': 5.1,
+        'gap_y': 0
+    },
+    '72210': {
+        'name': 'A-ONE 72210 (10面)',
+        'product_code': '72210',
+        'width': 86.4,
+        'height': 50.8,
+        'cols': 2,
+        'rows': 5,
+        'margin_left': 11.5,
+        'margin_top': 21.5,
+        'gap_x': 5.1,
+        'gap_y': 0
+    },
+    '31538': {
+        'name': 'A-ONE 31538 (21面)',
+        'product_code': '31538',
+        'width': 70.0,
+        'height': 42.3,
+        'cols': 3,
+        'rows': 7,
+        'margin_left': 0,
+        'margin_top': 0,
+        'gap_x': 0,
+        'gap_y': 0
+    },
+    '28918': {
+        'name': 'A-ONE 28918 (8面)',
+        'product_code': '28918',
+        'width': 99.0,
+        'height': 67.5,
+        'cols': 2,
+        'rows': 4,
+        'margin_left': 6.0,
+        'margin_top': 21.0,
+        'gap_x': 0,
+        'gap_y': 0
+    },
+    '28729': {
+        'name': 'A-ONE 28729 (18面)',
+        'product_code': '28729',
+        'width': 63.5,
+        'height': 46.6,
+        'cols': 3,
+        'rows': 6,
+        'margin_left': 4.0,
+        'margin_top': 21.0,
+        'gap_x': 0,
+        'gap_y': 0
+    },
+    '28315': {
+        'name': 'A-ONE 28315 (24面)',
+        'product_code': '28315',
+        'width': 66.0,
+        'height': 33.9,
+        'cols': 3,
+        'rows': 8,
+        'margin_left': 4.0,
+        'margin_top': 21.5,
+        'gap_x': 0,
+        'gap_y': 0
+    },
+    '28765': {
+        'name': 'A-ONE 28765 (65面)',
+        'product_code': '28765',
+        'width': 38.1,
+        'height': 21.2,
+        'cols': 5,
+        'rows': 13,
+        'margin_left': 4.0,
+        'margin_top': 21.5,
+        'gap_x': 0,
+        'gap_y': 0
+    }
+}
+
 
 def register_fonts():
     """日本語フォントの登録"""
@@ -38,13 +137,14 @@ def preview(id):
 
     # 原価情報
     unit_cost = recipe.calculate_unit_cost(cost_setting)
-    suggested_price = recipe.calculate_suggested_price(cost_setting) if cost_setting else unit_cost
+    suggested_price = recipe.get_selling_price(cost_setting) if cost_setting else unit_cost
 
     return render_template('labels/preview.html',
                          recipe=recipe,
                          cost_setting=cost_setting,
                          unit_cost=unit_cost,
-                         suggested_price=suggested_price)
+                         suggested_price=suggested_price,
+                         label_presets=LABEL_PRESETS)
 
 
 @bp.route('/<int:id>/generate', methods=['POST'])
@@ -60,24 +160,38 @@ def generate(id):
     production_date = request.form.get('production_date', datetime.now().strftime('%Y-%m-%d'))
     label_count = int(request.form.get('label_count', 1))
 
+    # ラベルサイズ設定の取得
+    label_preset = request.form.get('label_preset', 'custom')
+
+    # プリセットまたはカスタムサイズの取得
+    if label_preset == 'custom':
+        # カスタムサイズ
+        label_width = float(request.form.get('custom_width', 90)) * mm
+        label_height = float(request.form.get('custom_height', 60)) * mm
+        cols = int(request.form.get('custom_cols', 2))
+        rows = int(request.form.get('custom_rows', 4))
+        margin_left = float(request.form.get('custom_margin_left', 15)) * mm
+        margin_top = float(request.form.get('custom_margin_top', 20)) * mm
+        gap_x = float(request.form.get('custom_gap_x', 10)) * mm
+        gap_y = float(request.form.get('custom_gap_y', 8)) * mm
+    else:
+        # プリセット使用
+        preset = LABEL_PRESETS.get(label_preset, LABEL_PRESETS['custom'])
+        label_width = preset['width'] * mm
+        label_height = preset['height'] * mm
+        cols = preset['cols']
+        rows = preset['rows']
+        margin_left = preset['margin_left'] * mm
+        margin_top = preset['margin_top'] * mm
+        gap_x = preset['gap_x'] * mm
+        gap_y = preset['gap_y'] * mm
+
     # PDF生成
     buffer = io.BytesIO()
     font_name = register_fonts()
 
     # A4サイズ (210mm x 297mm)
     page_width, page_height = A4
-
-    # ラベルサイズ (90mm x 60mm)
-    label_width = 90 * mm
-    label_height = 60 * mm
-
-    # 1ページに並べるラベル数 (2列 x 4行 = 8枚)
-    cols = 2
-    rows = 4
-    margin_left = 15 * mm
-    margin_top = 20 * mm
-    gap_x = 10 * mm
-    gap_y = 8 * mm
 
     c = canvas.Canvas(buffer, pagesize=A4)
 
@@ -189,8 +303,8 @@ def draw_label(c, x, y, width, height, recipe, cost_setting,
         current_y -= 3 * mm
 
     if show_price:
-        suggested_price = recipe.calculate_suggested_price(cost_setting) if cost_setting else 0
-        c.drawString(x + padding, current_y, f"販売価格: {suggested_price:.0f}円")
+        selling_price = recipe.get_selling_price(cost_setting) if cost_setting else 0
+        c.drawString(x + padding, current_y, f"販売価格: {selling_price:.0f}円")
         current_y -= 3 * mm
 
     # 店舗名(右下)

@@ -168,6 +168,7 @@ class Recipe(db.Model):
     production_time = db.Column(db.Integer, default=0)  # 製造時間(分)
     shelf_life_days = db.Column(db.Integer)  # 賞味期限(日数)
     custom_profit_margin = db.Column(db.Numeric(5, 2))  # 商品ごとの利益率(%)、Noneの場合は基本設定を使用
+    selling_price = db.Column(db.Numeric(10, 2))  # 手動設定の販売価格、Noneの場合は推奨価格を使用
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -234,6 +235,12 @@ class Recipe(db.Model):
     def get_profit_margin(self, cost_setting):
         """使用している利益率を取得"""
         return self.custom_profit_margin if self.custom_profit_margin is not None else (cost_setting.profit_margin if cost_setting else 0)
+
+    def get_selling_price(self, cost_setting):
+        """販売価格を取得（手動設定があればそれを、なければ推奨価格を返す）"""
+        if self.selling_price is not None:
+            return float(self.selling_price)
+        return self.calculate_suggested_price(cost_setting)
 
     def get_allergens(self):
         """アレルゲン情報の取得"""

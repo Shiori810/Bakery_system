@@ -85,9 +85,9 @@
                                                 <span class="badge bg-warning text-dark ms-1">{{ ri.ingredient.allergen_type }}</span>
                                             {% endif %}
                                         </td>
-                                        <td class="text-end">{{ ri.quantity }} {{ ri.ingredient.unit }}</td>
-                                        <td class="text-end">{{ "%.2f"|format(ri.ingredient.unit_price) }}円</td>
-                                        <td class="text-end">{{ "%.2f"|format(ri.quantity * ri.ingredient.unit_price) }}円</td>
+                                        <td class="text-end">{{ ri.quantity }} {{ ri.ingredient.usage_unit }}</td>
+                                        <td class="text-end">{{ "%.2f"|format(ri.ingredient.get_usage_unit_price()) }}円</td>
+                                        <td class="text-end">{{ "%.2f"|format(ri.calculate_cost()) }}円</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -163,13 +163,20 @@
                             <strong class="text-primary fs-4">{{ "%.0f"|format(unit_cost) }}円</strong>
                         </div>
 
-                        {% set profit_margin = recipe.get_profit_margin(cost_setting) %}
-                        {% if profit_margin > 0 %}
-                            <div class="alert alert-success mb-0">
-                                <div class="d-flex justify-content-between">
-                                    <span>販売推奨価格</span>
-                                    <strong class="fs-5">{{ "%.0f"|format(suggested_price) }}円</strong>
-                                </div>
+                        <div class="alert alert-success mb-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>
+                                    {% if recipe.selling_price is not none %}
+                                        販売価格
+                                        <span class="badge bg-warning text-dark">手動設定</span>
+                                    {% else %}
+                                        販売推奨価格
+                                    {% endif %}
+                                </span>
+                                <strong class="fs-5">{{ "%.0f"|format(suggested_price) }}円</strong>
+                            </div>
+                            {% if recipe.selling_price is none %}
+                                {% set profit_margin = recipe.get_profit_margin(cost_setting) %}
                                 <small class="text-muted">
                                     利益率 {{ profit_margin }}%
                                     {% if recipe.custom_profit_margin is not none %}
@@ -178,8 +185,8 @@
                                         <span class="badge bg-secondary">基本設定</span>
                                     {% endif %}
                                 </small>
-                            </div>
-                        {% endif %}
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>

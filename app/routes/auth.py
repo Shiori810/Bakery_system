@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models import db, Store, CostSetting
-from app.forms import RegistrationForm, LoginForm, PasswordChangeForm
+from app.forms import RegistrationForm, LoginForm, PasswordChangeForm, PasswordResetForm, ForgotLoginIDForm
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -84,3 +84,44 @@ def change_password():
             flash('現在のパスワードが正しくありません', 'danger')
 
     return render_template('auth/change_password.html', form=form)
+
+
+@bp.route('/reset-password', methods=['GET', 'POST'])
+def reset_password():
+    """パスワードリセット"""
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+
+    form = PasswordResetForm()
+    if form.validate_on_submit():
+        store = Store.query.filter_by(login_id=form.login_id.data).first()
+
+        if store:
+            # パスワードをリセット
+            store.set_password(form.new_password.data)
+            db.session.commit()
+            flash('パスワードをリセットしました。新しいパスワードでログインしてください。', 'success')
+            return redirect(url_for('auth.login'))
+        else:
+            flash('入力されたログインIDは存在しません', 'danger')
+
+    return render_template('auth/reset_password.html', form=form)
+
+
+@bp.route('/forgot-login-id', methods=['GET', 'POST'])
+def forgot_login_id():
+    """ログインID確認"""
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+
+    form = ForgotLoginIDForm()
+    found_stores = None
+
+    if form.validate_on_submit():
+        # 店舗名で検索（部分一致）
+        found_stores = Store.query.filter(Store.store_name.like(f'%{form.store_name.data}%')).all()
+
+        if not found_stores:
+            flash('該当する店舗が見つかりませんでした', 'warning')
+
+    return render_template('auth/forgot_login_id.html', form=form, found_stores=found_stores)

@@ -35,6 +35,14 @@
                                     {{ form.password.errors[0] }}
                                 </div>
                             {% endif %}
+                            <div class="d-flex justify-content-between mt-2">
+                                <a href="{{ url_for('auth.forgot_login_id') }}" class="text-decoration-none small">
+                                    <i class="bi bi-person-question"></i> ログインIDを忘れた
+                                </a>
+                                <a href="{{ url_for('auth.reset_password') }}" class="text-decoration-none small">
+                                    <i class="bi bi-key"></i> パスワードを忘れた
+                                </a>
+                            </div>
                         </div>
 
                         <div class="d-grid">
