@@ -25,13 +25,13 @@
 
 以下の設定を入力：
 
-- **Name**: `bakery-cost-calculator`（または任意の名前）
-- **Region**: `Singapore` または最寄りのリージョン
+- **Name**: `Bakery_system`（または任意の名前）
+- **Region**: `Singapore` または最寄りのリージョン（データベースと同じリージョン推奨）
 - **Branch**: `main`
 - **Root Directory**: 空欄（デフォルト）
 - **Runtime**: `Python 3`
 - **Build Command**: `pip install -r requirements.txt`
-- **Start Command**: `gunicorn run:app`
+- **Start Command**: `gunicorn -w 4 -b 0.0.0.0:$PORT run:app`（重要: ポート指定が必須）
 
 ### 4. プランを選択
 
@@ -63,10 +63,13 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 3. `Create Database` をクリック
 
-4. データベース詳細ページで `Internal Database URL` をコピー
+4. データベース詳細ページで `External Database URL` をコピー
+   - **重要**: Internal URLが短縮形式（`@dpg-xxx-a/`）の場合、External URLを使用
+   - External URLは完全なホスト名（`.singapore-postgres.render.com`など）を含む
+   - 目のアイコン（👁️）をクリックして完全なURLを表示
 
 5. Webサービスの環境変数に戻って：
-   - `DATABASE_URL` = コピーしたURL
+   - `DATABASE_URL` = コピーした**External** Database URL
 
 ### 7. デプロイを実行
 
@@ -78,10 +81,12 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 デプロイが成功すると、URLが表示されます：
 ```
-https://bakery-cost-calculator.onrender.com
+https://bakery-system.onrender.com
 ```
 
 ブラウザでアクセスして動作確認してください。
+
+**注意**: 初回アクセス時は起動に30秒〜1分かかる場合があります（無料プランの制限）。
 
 ## 注意事項
 
@@ -115,11 +120,22 @@ https://bakery-cost-calculator.onrender.com
 - **原因**: DATABASE_URLが正しく設定されていない
 - **解決**: 環境変数のDATABASE_URLを確認
 
+**エラー**: `could not translate host name "dpg-xxx-a" to address`
+- **原因**: Internal Database URLが短縮形式でホスト名が不完全
+- **解決**: External Database URLを使用（完全なホスト名 `.singapore-postgres.render.com` を含む）
+- **例**:
+  - NG: `postgresql://user:pass@dpg-xxx-a/db`
+  - OK: `postgresql://user:pass@dpg-xxx-a.singapore-postgres.render.com/db`
+
 ### アプリケーションが起動しない
 
 **エラー**: `Application failed to start`
 - **原因**: Start Commandが間違っている
-- **解決**: Start Commandが `gunicorn run:app` になっているか確認
+- **解決**: Start Commandが `gunicorn -w 4 -b 0.0.0.0:$PORT run:app` になっているか確認
+
+**エラー**: `Failed to find attribute 'app' in 'app'`
+- **原因**: Gunicornがappオブジェクトを見つけられない、またはポート指定が不足
+- **解決**: Start Commandを `gunicorn -w 4 -b 0.0.0.0:$PORT run:app` に変更
 
 ## 更新のデプロイ
 

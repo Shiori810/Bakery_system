@@ -290,13 +290,24 @@ export FLASK_DEBUG=True
 python run.py
 ```
 
+## 本番環境
+
+**公開URL**: https://bakery-system.onrender.com
+
+本番環境はRenderで稼働中です。初回アクセス時は起動に30秒〜1分かかる場合があります（無料プランの制限）。
+
 ## 機能ドキュメント
 
-詳細な機能説明は以下のドキュメントを参照してください：
+詳細な機能説明とデプロイ手順は以下のドキュメントを参照してください：
 
+### 機能説明
 - [原価計算修正と販売価格機能](COST_CALCULATION_FIX_AND_SELLING_PRICE_FEATURE.md) - 原価計算の単位変換対応と販売価格の手動設定機能
 - [ラベルサイズカスタマイズ機能](LABEL_SIZE_CUSTOMIZATION_FEATURE.md) - A-ONE製品対応とカスタムラベルサイズ設定
 - [認証復旧機能](AUTHENTICATION_RECOVERY_FEATURE.md) - パスワードリセットとログインID復旧機能
+
+### デプロイ
+- [Renderデプロイガイド](RENDER_DEPLOYMENT_GUIDE.md) - 実際のデプロイ手順と問題解決方法
+- [デプロイ手順（簡易版）](DEPLOY.md) - 基本的なデプロイ手順
 
 ## バージョン履歴
 
