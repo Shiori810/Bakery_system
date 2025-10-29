@@ -13,6 +13,57 @@ import os
 
 bp = Blueprint('labels', __name__, url_prefix='/labels')
 
+
+def split_japanese_text(canvas_obj, text, font_name, font_size, max_width):
+    """
+    日本語テキストを指定した幅に収まるように分割する
+
+    Args:
+        canvas_obj: ReportLabのCanvasオブジェクト
+        text: 分割するテキスト
+        font_name: フォント名
+        font_size: フォントサイズ
+        max_width: 最大幅（ポイント単位）
+
+    Returns:
+        分割された行のリスト
+    """
+    if not text:
+        return []
+
+    # 材料を「、」で分割
+    ingredients = text.split('、')
+    lines = []
+    current_line = ""
+
+    for i, ingredient in enumerate(ingredients):
+        # 最後の材料以外は「、」を追加
+        test_text = ingredient if i == len(ingredients) - 1 else ingredient + '、'
+
+        # 現在の行に追加した場合の幅をチェック
+        test_full_line = current_line + test_text if current_line else test_text
+        text_width = canvas_obj.stringWidth(test_full_line, font_name, font_size)
+
+        if text_width <= max_width:
+            # 幅内に収まる場合は現在の行に追加
+            current_line = test_full_line
+        else:
+            # 幅を超える場合
+            if current_line:
+                # 現在の行を確定して次の行へ
+                lines.append(current_line)
+                current_line = test_text
+            else:
+                # 1つの材料だけで幅を超える場合は強制的に追加
+                lines.append(test_text)
+                current_line = ""
+
+    # 最後の行を追加
+    if current_line:
+        lines.append(current_line)
+
+    return lines
+
 # A-ONE製品ラベルサイズプリセット
 LABEL_PRESETS = {
     'custom': {
@@ -276,10 +327,14 @@ def draw_label(c, x, y, width, height, recipe, cost_setting,
     if not ingredients_text:
         ingredients_text = "材料未設定"
 
-    # 材料名を折り返し
-    lines = simpleSplit(ingredients_text, font_name, 7, width - 2 * padding)
-    c.setFont(font_name, 7)
-    for line in lines[:4]:  # 最大4行
+    # 材料名を折り返し（横幅に収まるように複数行に分割）
+    max_width = width - 2 * padding
+    ingredient_font_size = 7
+    c.setFont(font_name, ingredient_font_size)
+
+    # 日本語対応の折り返し関数を使用（最大6行まで表示）
+    lines = split_japanese_text(c, ingredients_text, font_name, ingredient_font_size, max_width)
+    for line in lines[:6]:  # 最大6行
         c.drawString(x + padding, current_y, line)
         current_y -= 3 * mm
 
