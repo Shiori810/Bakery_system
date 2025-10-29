@@ -300,18 +300,19 @@ def draw_label(c, x, y, width, height, recipe, cost_setting,
     padding = 3 * mm
     current_y = y + height - padding
 
-    # 商品名 (大きめ)
-    c.setFont(font_name, 14)
-    text_width = c.stringWidth(recipe.product_name, font_name, 14)
-    if text_width > width - 2 * padding:
-        # 長い場合は折り返し
-        lines = simpleSplit(recipe.product_name, font_name, 14, width - 2 * padding)
-        for line in lines:
-            c.drawString(x + padding, current_y - 5 * mm, line)
-            current_y -= 6 * mm
-    else:
-        c.drawString(x + padding, current_y - 5 * mm, recipe.product_name)
-        current_y -= 8 * mm
+    # 商品名（材料より大きく、折り返し対応）
+    product_name_font_size = 10
+    c.setFont(font_name, product_name_font_size)
+
+    # 商品名を折り返し（最大3行まで）
+    max_width = width - 2 * padding
+    product_lines = simpleSplit(recipe.product_name, font_name, product_name_font_size, max_width)
+
+    for line in product_lines[:3]:  # 最大3行
+        c.drawString(x + padding, current_y, line)
+        current_y -= 4 * mm
+
+    current_y -= 1 * mm  # 商品名と区切り線の間隔
 
     # 区切り線
     c.setLineWidth(0.3)
