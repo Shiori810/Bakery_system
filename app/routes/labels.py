@@ -376,7 +376,11 @@ def draw_label(c, x, y, width, height, recipe, cost_setting,
         c.drawString(x + padding, current_y, f"販売価格: {selling_price:.0f}円")
         current_y -= 3 * mm
 
-    # 店舗名(右下)
+    # 店舗名（価格情報の下、または罫線の下に配置）
+    if not (show_cost or show_price):
+        # 価格情報がない場合は少し余白を追加
+        current_y -= 2 * mm
+
     c.setFont(font_name, 6)
     store_name = recipe.store.store_name
     text_width = c.stringWidth(store_name, font_name, 6)
@@ -391,5 +395,5 @@ def draw_label(c, x, y, width, height, recipe, cost_setting,
         store_name = store_name + "..."
         text_width = c.stringWidth(store_name, font_name, 6)
 
-    # 右端から余白を確保して描画
-    c.drawString(x + width - padding - text_width, y + padding + 1*mm, store_name)
+    # 右端に配置（current_yを使用して罫線と重ならないようにする）
+    c.drawString(x + width - padding - text_width, current_y, store_name)
