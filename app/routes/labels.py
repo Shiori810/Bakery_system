@@ -319,24 +319,37 @@ def draw_label(c, x, y, width, height, recipe, cost_setting,
     current_y -= 4 * mm
 
     # 材料一覧
-    c.setFont(font_name, 8)
-    c.drawString(x + padding, current_y, "【材料】")
-    current_y -= 3.5 * mm
-
     ingredients_text = "、".join([ri.ingredient.name for ri in recipe.recipe_ingredients])
     if not ingredients_text:
         ingredients_text = "材料未設定"
 
-    # 材料名を折り返し（横幅に収まるように複数行に分割）
-    max_width = width - 2 * padding
-    ingredient_font_size = 7
-    c.setFont(font_name, ingredient_font_size)
+    # 【材料】の見出しの幅を計算
+    label_text = "【材料】"
+    label_font_size = 8
+    c.setFont(font_name, label_font_size)
+    label_width = c.stringWidth(label_text, font_name, label_font_size)
 
-    # 日本語対応の折り返し関数を使用（最大6行まで表示）
-    lines = split_japanese_text(c, ingredients_text, font_name, ingredient_font_size, max_width)
-    for line in lines[:6]:  # 最大6行
-        c.drawString(x + padding, current_y, line)
+    # 材料を表示できる幅を計算（見出しの右から）
+    ingredient_font_size = 7
+    available_width = width - 2 * padding - label_width
+
+    # 材料を折り返し
+    c.setFont(font_name, ingredient_font_size)
+    lines = split_japanese_text(c, ingredients_text, font_name, ingredient_font_size, available_width)
+
+    # 1行目：【材料】と最初の材料を同じ行に表示
+    c.setFont(font_name, label_font_size)
+    c.drawString(x + padding, current_y, label_text)
+
+    if lines:
+        c.setFont(font_name, ingredient_font_size)
+        c.drawString(x + padding + label_width, current_y, lines[0])
         current_y -= 3 * mm
+
+        # 2行目以降：材料のみを表示（最大6行まで）
+        for line in lines[1:6]:
+            c.drawString(x + padding, current_y, line)
+            current_y -= 3 * mm
 
     current_y -= 2 * mm
 
