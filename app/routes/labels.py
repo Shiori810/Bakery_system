@@ -246,11 +246,6 @@ def generate(id):
 def draw_label(c, x, y, width, height, recipe, cost_setting,
               show_cost, show_price, production_date, font_name):
     """ラベルを描画"""
-    # 枠線
-    c.setStrokeColorRGB(0, 0, 0)
-    c.setLineWidth(0.5)
-    c.rect(x, y, width, height)
-
     padding = 3 * mm
     current_y = y + height - padding
 
