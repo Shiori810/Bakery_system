@@ -210,8 +210,13 @@ LABEL_PRESETS = {
 
 def register_fonts():
     """日本語フォントの登録"""
-    # Windowsで利用可能な日本語フォントを順に試す
+    # Windows/Linux両方で利用可能な日本語フォントを順に試す
     font_candidates = [
+        # Linux (Render環境) で利用可能なフォント
+        ('/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc', 0),  # Noto Sans CJK
+        ('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc', 0),
+        ('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', None),  # DejaVu (日本語は限定的)
+        # Windows で利用可能なフォント
         ('C:/Windows/Fonts/msgothic.ttc', 0),  # MSゴシック（TTCの0番目）
         ('C:/Windows/Fonts/msmincho.ttc', 0),  # MS明朝（TTCの0番目）
         ('C:/Windows/Fonts/meiryo.ttc', 0),    # メイリオ（TTCの0番目）

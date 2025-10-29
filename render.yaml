@@ -4,7 +4,9 @@ services:
     env: python
     region: oregon
     plan: free
-    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    buildCommand: |
+      apt-get update && apt-get install -y fonts-noto-cjk &&
+      pip install --upgrade pip && pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT run:app
     envVars:
       - key: PYTHON_VERSION
