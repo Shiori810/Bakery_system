@@ -57,8 +57,8 @@ LABEL_PRESETS = {
         'height': 42.3,
         'cols': 3,
         'rows': 7,
-        'margin_left': 5.0,  # 左マージン（プリンター印字領域対応）
-        'margin_top': 10.5,  # 上マージン
+        'margin_left': 0,  # 余白なし用紙
+        'margin_top': 0,   # 余白なし用紙
         'gap_x': 0,
         'gap_y': 0
     },
