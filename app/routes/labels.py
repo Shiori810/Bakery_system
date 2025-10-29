@@ -14,9 +14,53 @@ import os
 bp = Blueprint('labels', __name__, url_prefix='/labels')
 
 
+def split_text_by_width(canvas_obj, text, font_name, font_size, max_width):
+    """
+    テキストを指定した幅に収まるように1文字ずつ分割する（商品名用）
+
+    Args:
+        canvas_obj: ReportLabのCanvasオブジェクト
+        text: 分割するテキスト
+        font_name: フォント名
+        font_size: フォントサイズ
+        max_width: 最大幅（ポイント単位）
+
+    Returns:
+        分割された行のリスト
+    """
+    if not text:
+        return []
+
+    lines = []
+    current_line = ""
+
+    for char in text:
+        test_line = current_line + char
+        text_width = canvas_obj.stringWidth(test_line, font_name, font_size)
+
+        if text_width <= max_width:
+            # 幅内に収まる場合は追加
+            current_line = test_line
+        else:
+            # 幅を超える場合、現在の行を確定して次の行へ
+            if current_line:
+                lines.append(current_line)
+                current_line = char
+            else:
+                # 1文字だけで幅を超える場合（通常はありえない）
+                lines.append(char)
+                current_line = ""
+
+    # 最後の行を追加
+    if current_line:
+        lines.append(current_line)
+
+    return lines
+
+
 def split_japanese_text(canvas_obj, text, font_name, font_size, max_width):
     """
-    日本語テキストを指定した幅に収まるように分割する
+    日本語テキストを指定した幅に収まるように分割する（材料用）
 
     Args:
         canvas_obj: ReportLabのCanvasオブジェクト
@@ -306,7 +350,7 @@ def draw_label(c, x, y, width, height, recipe, cost_setting,
 
     # 商品名を折り返し（最大3行まで）
     max_width = width - 2 * padding
-    product_lines = simpleSplit(recipe.product_name, font_name, product_name_font_size, max_width)
+    product_lines = split_text_by_width(c, recipe.product_name, font_name, product_name_font_size, max_width)
 
     for line in product_lines[:3]:  # 最大3行
         c.drawString(x + padding, current_y, line)
