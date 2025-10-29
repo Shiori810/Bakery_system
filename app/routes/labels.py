@@ -371,29 +371,33 @@ def draw_label(c, x, y, width, height, recipe, cost_setting,
         c.drawString(x + padding, current_y, f"原価: {unit_cost:.0f}円")
         current_y -= 3 * mm
 
-    if show_price:
-        selling_price = recipe.get_selling_price(cost_setting) if cost_setting else 0
-        c.drawString(x + padding, current_y, f"販売価格: {selling_price:.0f}円")
-        current_y -= 3 * mm
-
-    # 店舗名（価格情報の下、または罫線の下に配置）
-    if not (show_cost or show_price):
-        # 価格情報がない場合は少し余白を追加
-        current_y -= 2 * mm
-
+    # 店舗名の準備（販売価格と同じ行に表示するため先に準備）
     c.setFont(font_name, 6)
     store_name = recipe.store.store_name
-    text_width = c.stringWidth(store_name, font_name, 6)
+    store_text_width = c.stringWidth(store_name, font_name, 6)
 
     # ラベルの幅を超えないように調整
-    max_width = width - 2 * padding
-    if text_width > max_width:
+    max_store_width = width - 2 * padding
+    if store_text_width > max_store_width:
         # 店舗名が長い場合は切り詰める
-        while text_width > max_width and len(store_name) > 1:
+        while store_text_width > max_store_width and len(store_name) > 1:
             store_name = store_name[:-1]
-            text_width = c.stringWidth(store_name + "...", font_name, 6)
+            store_text_width = c.stringWidth(store_name + "...", font_name, 6)
         store_name = store_name + "..."
-        text_width = c.stringWidth(store_name, font_name, 6)
+        store_text_width = c.stringWidth(store_name, font_name, 6)
 
-    # 右端に配置（current_yを使用して罫線と重ならないようにする）
-    c.drawString(x + width - padding - text_width, current_y, store_name)
+    if show_price:
+        # 販売価格を表示
+        c.setFont(font_name, 7)
+        selling_price = recipe.get_selling_price(cost_setting) if cost_setting else 0
+        c.drawString(x + padding, current_y, f"販売価格: {selling_price:.0f}円")
+
+        # 店舗名を同じ行の右端に表示
+        c.setFont(font_name, 6)
+        c.drawString(x + width - padding - store_text_width, current_y, store_name)
+        current_y -= 3 * mm
+    else:
+        # 販売価格がない場合は店舗名のみを右端に表示
+        if not show_cost:
+            current_y -= 2 * mm
+        c.drawString(x + width - padding - store_text_width, current_y, store_name)
