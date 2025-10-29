@@ -144,16 +144,6 @@ class RecipeForm(FlaskForm):
 
 class CostSettingForm(FlaskForm):
     """原価計算設定フォーム"""
-    include_labor_cost = BooleanField('人件費を含める')
-    include_utility_cost = BooleanField('光熱費を含める')
-    hourly_wage = DecimalField('時給(円)', validators=[
-        Optional(),
-        NumberRange(min=0, message='時給は0以上で入力してください')
-    ], places=2, default=0)
-    monthly_utility_cost = DecimalField('月額光熱費(円)', validators=[
-        Optional(),
-        NumberRange(min=0, message='月額光熱費は0以上で入力してください')
-    ], places=2, default=0)
     profit_margin = DecimalField('利益率(%)', validators=[
         Optional(),
         NumberRange(min=0, max=100, message='利益率は0〜100で入力してください')

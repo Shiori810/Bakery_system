@@ -40,10 +40,6 @@ class CostSetting(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     store_id = db.Column(db.Integer, db.ForeignKey('stores.id'), nullable=False, unique=True)
-    include_labor_cost = db.Column(db.Boolean, default=False)
-    include_utility_cost = db.Column(db.Boolean, default=False)
-    hourly_wage = db.Column(db.Numeric(10, 2), default=0.0)  # 時給
-    monthly_utility_cost = db.Column(db.Numeric(10, 2), default=0.0)  # 月額光熱費
     profit_margin = db.Column(db.Numeric(5, 2), default=30.0)  # 利益率(%)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -192,19 +188,7 @@ class Recipe(db.Model):
 
         total_cost = material_cost
 
-        # 人件費の追加
-        if cost_setting.include_labor_cost and self.production_time > 0:
-            labor_cost = float(cost_setting.hourly_wage) * (self.production_time / 60)
-            total_cost += labor_cost
-
-        # 光熱費の追加(簡易計算: 月額を30日で割って時間按分)
-        if cost_setting.include_utility_cost and self.production_time > 0:
-            daily_utility = float(cost_setting.monthly_utility_cost) / 30
-            hourly_utility = daily_utility / 24
-            utility_cost = hourly_utility * (self.production_time / 60)
-            total_cost += utility_cost
-
-        # カスタム原価項目の追加
+        # カスタム原価項目の追加（人件費・光熱費を含むすべての原価項目）
         custom_items = CustomCostItem.query.filter_by(
             store_id=self.store_id,
             is_active=True

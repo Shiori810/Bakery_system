@@ -9,8 +9,48 @@
     <div class="alert alert-info">
         <i class="bi bi-info-circle"></i>
         <strong>カスタム原価項目とは？</strong><br>
-        材料費・人件費・光熱費以外の原価を自由に設定できます。<br>
-        例: 包装費、減価償却費、配送費、家賃按分など
+        材料費以外のすべての原価項目を自由に設定できます。<br>
+        <strong>例</strong>: 人件費、光熱費、包装費、減価償却費、配送費、家賃按分など
+    </div>
+
+    <!-- 変換ヘルパーツール -->
+    <div class="card mb-4 bg-light border-info">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="bi bi-calculator"></i> 分単価変換ツール</h5>
+        </div>
+        <div class="card-body">
+            <p class="small mb-3">
+                <i class="bi bi-lightbulb-fill text-warning"></i>
+                時給や月額光熱費を「時間あたり(分単位)」の設定値に変換できます
+            </p>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="bi bi-person-fill"></i> 時給 → 分単価</h6>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text">時給</span>
+                        <input type="number" id="hourly_wage_input" class="form-control" placeholder="1200" value="1200">
+                        <span class="input-group-text">円</span>
+                    </div>
+                    <div class="alert alert-success mb-0">
+                        <strong>分単価:</strong> <span id="per_minute_labor" class="fs-5 text-primary">20.00</span> 円/分
+                        <br><small class="text-muted">この値を「時間あたり」の金額欄に入力してください</small>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h6><i class="bi bi-lightning-fill"></i> 月額光熱費 → 分単価</h6>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text">月額</span>
+                        <input type="number" id="monthly_utility_input" class="form-control" placeholder="30000" value="30000">
+                        <span class="input-group-text">円</span>
+                    </div>
+                    <div class="alert alert-success mb-0">
+                        <strong>分単価:</strong> <span id="per_minute_utility" class="fs-5 text-primary">0.6944</span> 円/分
+                        <br><small class="text-muted">この値を「時間あたり」の金額欄に入力してください</small>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- 新規追加フォーム -->
@@ -138,11 +178,31 @@
                     <small>
                         <i class="bi bi-lightbulb"></i>
                         <strong>ヒント:</strong>
-                        <ul class="mb-0 mt-2">
+                        <ul class="mb-2 mt-2">
                             <li><strong>固定費</strong>: レシピ全体に対して一定額を加算（例: 包装材料費50円）</li>
                             <li><strong>個数あたり</strong>: 製造個数 × 単価で計算（例: 袋代10円/個 × 10個 = 100円）</li>
-                            <li><strong>時間あたり</strong>: 製造時間(分) × 分単価で計算（例: 家賃按分2円/分 × 180分 = 360円）</li>
+                            <li><strong>時間あたり</strong>: 製造時間(分) × 分単価で計算（例: 人件費20円/分 × 180分 = 3600円）</li>
                         </ul>
+
+                        <hr class="my-2">
+
+                        <strong>時給から分単価への換算例:</strong>
+                        <ul class="mb-2 mt-2">
+                            <li>時給1,200円 → 分単価20円 (1200 ÷ 60)</li>
+                            <li>時給1,500円 → 分単価25円 (1500 ÷ 60)</li>
+                            <li>時給1,800円 → 分単価30円 (1800 ÷ 60)</li>
+                        </ul>
+
+                        <strong>月額光熱費から分単価への換算例:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>月額30,000円 → 分単価0.69円 (30000 ÷ 30日 ÷ 24時間 ÷ 60分)</li>
+                            <li>月額45,000円 → 分単価1.04円 (45000 ÷ 43200)</li>
+                            <li>月額60,000円 → 分単価1.39円 (60000 ÷ 43200)</li>
+                        </ul>
+
+                        <div class="mt-2 text-info">
+                            <i class="bi bi-info-circle-fill"></i> 上の「分単価変換ツール」を使うと自動計算できます
+                        </div>
                     </small>
                 </div>
             {% else %}
@@ -223,5 +283,22 @@ document.querySelectorAll('.edit-btn').forEach(btn => {
         new bootstrap.Modal(document.getElementById('editModal')).show();
     });
 });
+
+// 分単価変換ツール
+document.getElementById('hourly_wage_input').addEventListener('input', function() {
+    const hourlyWage = parseFloat(this.value) || 0;
+    const perMinute = (hourlyWage / 60).toFixed(2);
+    document.getElementById('per_minute_labor').textContent = perMinute;
+});
+
+document.getElementById('monthly_utility_input').addEventListener('input', function() {
+    const monthlyUtility = parseFloat(this.value) || 0;
+    const perMinute = (monthlyUtility / 43200).toFixed(4);
+    document.getElementById('per_minute_utility').textContent = perMinute;
+});
+
+// 初期値を計算
+document.getElementById('hourly_wage_input').dispatchEvent(new Event('input'));
+document.getElementById('monthly_utility_input').dispatchEvent(new Event('input'));
 </script>
 {% endblock %}
