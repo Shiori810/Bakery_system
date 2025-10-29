@@ -342,7 +342,7 @@ def draw_label(c, x, y, width, height, recipe, cost_setting,
               show_cost, show_price, production_date, font_name):
     """ラベルを描画"""
     padding = 3 * mm
-    current_y = y + height - padding
+    current_y = y + height - padding - 1 * mm  # 上端から余裕を持たせる（印刷時の切れ防止）
 
     # 商品名（材料より大きく、折り返し対応）
     product_name_font_size = 10
