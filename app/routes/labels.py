@@ -58,7 +58,7 @@ LABEL_PRESETS = {
         'cols': 3,
         'rows': 7,
         'margin_left': 0,
-        'margin_top': 0,
+        'margin_top': 10.5,  # 上マージン
         'gap_x': 0,
         'gap_y': 0
     },
