@@ -354,9 +354,7 @@ def draw_label(c, x, y, width, height, recipe, cost_setting,
 
     for line in product_lines[:3]:  # 最大3行
         c.drawString(x + padding, current_y, line)
-        current_y -= 4 * mm
-
-    current_y -= 1 * mm  # 商品名と区切り線の間隔
+        current_y -= 3.5 * mm  # 行間を少し詰める
 
     # 区切り線
     c.setLineWidth(0.3)
