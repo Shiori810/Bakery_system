@@ -419,7 +419,6 @@ def draw_label(c, x, y, width, height, recipe, cost_setting,
 
     # 原価・価格情報
     if show_cost or show_price:
-        current_y -= 1 * mm
         c.setLineWidth(0.3)
         c.line(x + padding, current_y, x + width - padding, current_y)
         current_y -= 3 * mm
