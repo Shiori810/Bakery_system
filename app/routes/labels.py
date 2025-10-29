@@ -131,15 +131,19 @@ def register_fonts():
                 if subfont_index is not None:
                     # TTCファイルの特定のサブフォントを指定
                     pdfmetrics.registerFont(TTFont('Japanese', font_path, subfontIndex=subfont_index))
+                    print(f"[Font] Successfully registered: {font_path} (subfontIndex={subfont_index})")
                 else:
                     # 通常のTTFまたはTTC全体
                     pdfmetrics.registerFont(TTFont('Japanese', font_path))
+                    print(f"[Font] Successfully registered: {font_path}")
                 return 'Japanese'
         except Exception as e:
             # このフォントが使えない場合は次を試す
+            print(f"[Font] Failed to register {font_path}: {e}")
             continue
 
     # すべてのフォントが使えない場合はHelveticaを使用（文字化けする）
+    print("[Font] WARNING: No Japanese font available, using Helvetica (text will be garbled)")
     return 'Helvetica'
 
 
@@ -326,4 +330,16 @@ def draw_label(c, x, y, width, height, recipe, cost_setting,
     c.setFont(font_name, 6)
     store_name = recipe.store.store_name
     text_width = c.stringWidth(store_name, font_name, 6)
-    c.drawString(x + width - padding - text_width, y + padding, store_name)
+
+    # ラベルの幅を超えないように調整
+    max_width = width - 2 * padding
+    if text_width > max_width:
+        # 店舗名が長い場合は切り詰める
+        while text_width > max_width and len(store_name) > 1:
+            store_name = store_name[:-1]
+            text_width = c.stringWidth(store_name + "...", font_name, 6)
+        store_name = store_name + "..."
+        text_width = c.stringWidth(store_name, font_name, 6)
+
+    # 右端から余白を確保して描画
+    c.drawString(x + width - padding - text_width, y + padding + 1*mm, store_name)
