@@ -115,14 +115,21 @@ LABEL_PRESETS = {
 
 def register_fonts():
     """日本語フォントの登録"""
-    # Windowsで利用可能な日本語フォントを順に試す
+    # プロジェクト内のフォントパス（本番環境でも使用可能）
+    app_font_path = os.path.join(os.path.dirname(__file__), '..', 'static', 'fonts', 'NotoSansJP-Regular.ttf')
+    app_font_path = os.path.abspath(app_font_path)
+
+    # フォント候補リスト（プロジェクト内フォントを優先）
     font_candidates = [
+        (app_font_path, None),  # Noto Sans JP（プロジェクト内、本番環境用）
         ('C:/Windows/Fonts/msgothic.ttc', 0),  # MSゴシック（TTCの0番目）
         ('C:/Windows/Fonts/msmincho.ttc', 0),  # MS明朝（TTCの0番目）
         ('C:/Windows/Fonts/meiryo.ttc', 0),    # メイリオ（TTCの0番目）
         ('C:/Windows/Fonts/msgothic.ttc', None),  # MSゴシック（TTC全体）
         ('C:/Windows/Fonts/YuGothM.ttc', 0),   # 游ゴシック Medium
         ('C:/Windows/Fonts/YuGothB.ttc', 0),   # 游ゴシック Bold
+        ('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc', 0),  # Linux Noto Sans CJK
+        ('/usr/share/fonts/truetype/noto/NotoSansJP-Regular.ttf', None),  # Linux Noto Sans JP
     ]
 
     for font_path, subfont_index in font_candidates:
@@ -133,7 +140,7 @@ def register_fonts():
                     pdfmetrics.registerFont(TTFont('Japanese', font_path, subfontIndex=subfont_index))
                     print(f"[Font] Successfully registered: {font_path} (subfontIndex={subfont_index})")
                 else:
-                    # 通常のTTFまたはTTC全体
+                    # 通常のTTFファイル
                     pdfmetrics.registerFont(TTFont('Japanese', font_path))
                     print(f"[Font] Successfully registered: {font_path}")
                 return 'Japanese'
