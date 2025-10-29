@@ -214,15 +214,21 @@ def register_fonts():
     app_font_path = os.path.join(os.path.dirname(__file__), '..', 'static', 'fonts', 'NotoSansJP-Regular.ttf')
     app_font_path = os.path.abspath(app_font_path)
 
-    # フォント候補リスト（Windowsフォントを優先、本番環境ではプロジェクト内フォント）
+    # Windows/Linux両方で利用可能な日本語フォントを順に試す
     font_candidates = [
-        ('C:/Windows/Fonts/msgothic.ttc', 0),  # MSゴシック（TTCの0番目）- ローカル優先
+        # Windows で利用可能なフォント（ローカル環境優先）
+        ('C:/Windows/Fonts/msgothic.ttc', 0),  # MSゴシック（TTCの0番目）
         ('C:/Windows/Fonts/msmincho.ttc', 0),  # MS明朝（TTCの0番目）
         ('C:/Windows/Fonts/meiryo.ttc', 0),    # メイリオ（TTCの0番目）
         ('C:/Windows/Fonts/msgothic.ttc', None),  # MSゴシック（TTC全体）
         ('C:/Windows/Fonts/YuGothM.ttc', 0),   # 游ゴシック Medium
         ('C:/Windows/Fonts/YuGothB.ttc', 0),   # 游ゴシック Bold
-        (app_font_path, None),  # Noto Sans JP（プロジェクト内、本番環境用）
+        # プロジェクト内のフォント（本番環境用、286KB）
+        (app_font_path, None),  # Noto Sans JP OTF
+        # Linux (Render環境) で利用可能なシステムフォント
+        ('/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc', 0),  # Noto Sans CJK
+        ('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc', 0),
+        ('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', None),  # DejaVu (日本語は限定的)
     ]
 
     for font_path, subfont_index in font_candidates:
