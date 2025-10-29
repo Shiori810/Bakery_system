@@ -115,16 +115,31 @@ LABEL_PRESETS = {
 
 def register_fonts():
     """日本語フォントの登録"""
-    try:
-        # Windows標準フォント
-        font_path = 'C:/Windows/Fonts/msgothic.ttc'
-        if os.path.exists(font_path):
-            pdfmetrics.registerFont(TTFont('Japanese', font_path))
-            return 'Japanese'
-    except:
-        pass
+    # Windowsで利用可能な日本語フォントを順に試す
+    font_candidates = [
+        ('C:/Windows/Fonts/msgothic.ttc', 0),  # MSゴシック（TTCの0番目）
+        ('C:/Windows/Fonts/msmincho.ttc', 0),  # MS明朝（TTCの0番目）
+        ('C:/Windows/Fonts/meiryo.ttc', 0),    # メイリオ（TTCの0番目）
+        ('C:/Windows/Fonts/msgothic.ttc', None),  # MSゴシック（TTC全体）
+        ('C:/Windows/Fonts/YuGothM.ttc', 0),   # 游ゴシック Medium
+        ('C:/Windows/Fonts/YuGothB.ttc', 0),   # 游ゴシック Bold
+    ]
 
-    # フォントが見つからない場合はHelveticaを使用
+    for font_path, subfont_index in font_candidates:
+        try:
+            if os.path.exists(font_path):
+                if subfont_index is not None:
+                    # TTCファイルの特定のサブフォントを指定
+                    pdfmetrics.registerFont(TTFont('Japanese', font_path, subfontIndex=subfont_index))
+                else:
+                    # 通常のTTFまたはTTC全体
+                    pdfmetrics.registerFont(TTFont('Japanese', font_path))
+                return 'Japanese'
+        except Exception as e:
+            # このフォントが使えない場合は次を試す
+            continue
+
+    # すべてのフォントが使えない場合はHelveticaを使用（文字化けする）
     return 'Helvetica'
 
 
