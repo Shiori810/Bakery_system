@@ -287,6 +287,7 @@ def generate(id):
     # オプションの取得
     show_cost = request.form.get('show_cost') == 'on'
     show_price = request.form.get('show_price') == 'on'
+    show_consume_message = request.form.get('show_consume_message') == 'on'
     production_date = request.form.get('production_date', datetime.now().strftime('%Y-%m-%d'))
     label_count = int(request.form.get('label_count', 1))
 
@@ -338,7 +339,7 @@ def generate(id):
 
         # ラベル描画
         draw_label(c, x, y, label_width, label_height, recipe, cost_setting,
-                  show_cost, show_price, production_date, font_name)
+                  show_cost, show_price, show_consume_message, production_date, font_name)
 
         labels_drawn += 1
 
@@ -355,7 +356,7 @@ def generate(id):
 
 
 def draw_label(c, x, y, width, height, recipe, cost_setting,
-              show_cost, show_price, production_date, font_name):
+              show_cost, show_price, show_consume_message, production_date, font_name):
     """ラベルを描画"""
     padding = 3 * mm
     current_y = y + height - padding - 1 * mm  # 上端から余裕を持たせる（印刷時の切れ防止）
@@ -430,6 +431,12 @@ def draw_label(c, x, y, width, height, recipe, cost_setting,
         exp_date = prod_date + timedelta(days=recipe.shelf_life_days)
         c.drawString(x + padding, current_y, f"賞味期限: {exp_date.strftime('%Y年%m月%d日')}")
         current_y -= 3 * mm
+
+    # 消費期限メッセージ
+    if show_consume_message:
+        c.setFont(font_name, 8)
+        c.drawString(x + padding, current_y, "当日中にお召し上がりください")
+        current_y -= 4 * mm
 
     # 原価・価格情報
     if show_cost or show_price:
