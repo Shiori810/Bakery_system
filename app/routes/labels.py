@@ -231,9 +231,12 @@ def register_fonts():
         ('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', None),  # DejaVu (日本語は限定的)
     ]
 
+    print(f"[Font] Starting font registration, checking {len(font_candidates)} candidates")
     for font_path, subfont_index in font_candidates:
         try:
+            print(f"[Font] Checking: {font_path}")
             if os.path.exists(font_path):
+                print(f"[Font] Found: {font_path}")
                 if subfont_index is not None:
                     # TTCファイルの特定のサブフォントを指定
                     pdfmetrics.registerFont(TTFont('Japanese', font_path, subfontIndex=subfont_index))
@@ -243,6 +246,8 @@ def register_fonts():
                     pdfmetrics.registerFont(TTFont('Japanese', font_path))
                     print(f"[Font] Successfully registered: {font_path}")
                 return 'Japanese'
+            else:
+                print(f"[Font] Not found: {font_path}")
         except Exception as e:
             # このフォントが使えない場合は次を試す
             print(f"[Font] Failed to register {font_path}: {e}")
