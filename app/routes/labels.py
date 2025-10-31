@@ -204,6 +204,18 @@ LABEL_PRESETS = {
         'margin_top': 21.5,
         'gap_x': 0,
         'gap_y': 0
+    },
+    'F25A4-1': {
+        'name': 'F25A4-1 (25面)',
+        'product_code': 'F25A4-1',
+        'width': 38.0,
+        'height': 54.0,
+        'cols': 5,
+        'rows': 5,
+        'margin_left': 10.0,
+        'margin_top': 13.5,
+        'gap_x': 0,
+        'gap_y': 0
     }
 }
 
