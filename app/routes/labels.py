@@ -447,8 +447,15 @@ def draw_label(c, x, y, width, height, recipe, cost_setting,
     # 消費期限メッセージ
     if show_consume_message:
         c.setFont(font_name, 8)
-        c.drawString(x + padding, current_y, "当日中にお召し上がりください")
-        current_y -= 4 * mm
+        # ラベルの幅が50mm以下の場合は2行に分ける（F25A4-1など小さいラベル用）
+        if width <= 50 * mm:
+            c.drawString(x + padding, current_y, "当日中に")
+            current_y -= 3 * mm
+            c.drawString(x + padding, current_y, "お召し上がりください")
+            current_y -= 4 * mm
+        else:
+            c.drawString(x + padding, current_y, "当日中にお召し上がりください")
+            current_y -= 4 * mm
 
     # 原価・価格情報
     if show_cost or show_price:
