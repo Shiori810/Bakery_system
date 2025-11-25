@@ -55,6 +55,22 @@ def create_app(test_config=None):
     app.register_blueprint(labels.bp)
     app.register_blueprint(custom_costs.bp)
 
+    # エラーハンドラー
+    @app.errorhandler(500)
+    def internal_error(error):
+        import traceback
+        print("[ERROR] Internal Server Error:")
+        print(traceback.format_exc())
+        db.session.rollback()
+        return "Internal Server Error - Please check the logs", 500
+
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        import traceback
+        print(f"[ERROR] Unhandled exception: {e}")
+        print(traceback.format_exc())
+        return f"An error occurred: {str(e)}", 500
+
     # データベーステーブル作成
     with app.app_context():
         db.create_all()

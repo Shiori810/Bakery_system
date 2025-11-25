@@ -237,13 +237,27 @@ def register_fonts():
         ('C:/Windows/Fonts/YuGothB.ttc', 0),   # 游ゴシック Bold
         # プロジェクト内のフォント（本番環境用、286KB）
         (app_font_path, None),  # Noto Sans JP OTF
-        # Linux (Render環境) で利用可能なシステムフォント
-        ('/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc', 0),  # Noto Sans CJK
-        ('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc', 0),
+        # Linux (Render環境) で利用可能なシステムフォント - 修正版
+        ('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc', 0),  # fonts-noto-cjkでインストールされるパス
+        ('/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc', 0),  # 代替パス
+        ('/usr/share/fonts/opentype/noto/NotoSansJP-Regular.otf', None),  # 個別言語版
         ('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', None),  # DejaVu (日本語は限定的)
     ]
 
     print(f"[Font] Starting font registration, checking {len(font_candidates)} candidates")
+
+    # 利用可能なフォントディレクトリを確認（デバッグ用）
+    font_dirs = ['/usr/share/fonts/opentype/noto', '/usr/share/fonts/truetype/noto',
+                 '/usr/share/fonts/truetype/dejavu', 'C:/Windows/Fonts']
+    for font_dir in font_dirs:
+        if os.path.exists(font_dir):
+            print(f"[Font] Available directory: {font_dir}")
+            try:
+                files = os.listdir(font_dir)
+                print(f"[Font] Files in {font_dir}: {files[:10]}")  # 最初の10ファイルを表示
+            except Exception as e:
+                print(f"[Font] Could not list {font_dir}: {e}")
+
     for font_path, subfont_index in font_candidates:
         try:
             print(f"[Font] Checking: {font_path}")
@@ -263,6 +277,8 @@ def register_fonts():
         except Exception as e:
             # このフォントが使えない場合は次を試す
             print(f"[Font] Failed to register {font_path}: {e}")
+            import traceback
+            traceback.print_exc()
             continue
 
     # すべてのフォントが使えない場合はHelveticaを使用（文字化けする）

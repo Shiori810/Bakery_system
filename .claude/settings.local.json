@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git log:*)",
+      "Bash(dir /s \"c:\\Users\\ibuto\\pan\\bakery_cost_calculator\")",
+      "Bash(python:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd: 商品ごとの利益率設定機能を追加\n\n基本設定の利益率に加えて、商品（レシピ）ごとに個別の利益率を設定できるようになりました。\n\n## 主な変更点\n- Recipeモデルにcustom_profit_marginフィールドを追加\n- 商品ごとの利益率が未設定の場合は基本設定を使用\n- レシピ入力フォームに利益率入力フィールドを追加\n- レシピ詳細画面と一覧画面で利益率の種類をバッジで表示\n- データベースマイグレーションスクリプトを追加\n\n## 変更されたファイル\n- app/models.py: custom_profit_marginフィールドと計算ロジック追加\n- app/forms.py: RecipeFormに利益率フィールド追加\n- app/templates/recipes/form.html: 利益率入力UI追加\n- app/templates/recipes/detail.html: 利益率バッジ表示追加\n- app/templates/recipes/index.html: 利益率バッジ表示追加\n\n## 新規ファイル\n- migrate_add_custom_profit_margin.py: DBマイグレーションスクリプト\n- CUSTOM_PROFIT_MARGIN_UPDATE.md: 機能説明ドキュメント\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(rm:*)",
+      "Bash(timeout:*)",
+      "Bash(git checkout:*)",
+      "Bash(exit 0)",
+      "Bash(dir /s /b *.css)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
