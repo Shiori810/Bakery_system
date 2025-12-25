@@ -1,0 +1,74 @@
+erDiagram
+    Store ||--o| CostSetting : "1:1"
+    Store ||--o{ Ingredient : "1:N"
+    Store ||--o{ Recipe : "1:N"
+    Store ||--o{ CustomCostItem : "1:N"
+    Recipe ||--o{ RecipeIngredient : "1:N"
+    Ingredient ||--o{ RecipeIngredient : "1:N"
+
+    Store {
+        int id PK
+        string login_id UK "ログインID"
+        string password_hash "パスワードハッシュ"
+        string store_name "店舗名"
+        datetime created_at "作成日時"
+    }
+
+    CostSetting {
+        int id PK
+        int store_id FK "店舗ID(UNIQUE)"
+        decimal profit_margin "利益率(%)"
+        datetime created_at "作成日時"
+        datetime updated_at "更新日時"
+    }
+
+    Ingredient {
+        int id PK
+        int store_id FK "店舗ID"
+        string name "材料名"
+        decimal purchase_price "購入価格"
+        decimal purchase_quantity "購入数量"
+        string purchase_unit "購入単位"
+        string usage_unit "使用単位"
+        decimal unit_price "旧単価"
+        string unit "旧単位"
+        string supplier "仕入先"
+        boolean is_allergen "アレルゲン"
+        string allergen_type "種類"
+        datetime created_at "作成日時"
+        datetime updated_at "更新日時"
+    }
+
+    Recipe {
+        int id PK
+        int store_id FK "店舗ID"
+        string product_name "商品名"
+        string category "カテゴリー"
+        int production_quantity "製造個数"
+        int production_time "製造時間"
+        int shelf_life_days "賞味期限"
+        decimal custom_profit_margin "利益率(%)"
+        decimal selling_price "販売価格"
+        datetime created_at "作成日時"
+        datetime updated_at "更新日時"
+    }
+
+    RecipeIngredient {
+        int id PK
+        int recipe_id FK "レシピID"
+        int ingredient_id FK "材料ID"
+        decimal quantity "使用量"
+    }
+
+    CustomCostItem {
+        int id PK
+        int store_id FK "店舗ID"
+        string name "項目名"
+        string calculation_type "計算方法"
+        decimal amount "金額"
+        boolean is_active "有効"
+        string description "説明"
+        int display_order "表示順序"
+        datetime created_at "作成日時"
+        datetime updated_at "更新日時"
+    }

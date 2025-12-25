@@ -16,7 +16,12 @@
       "Bash(exit 0)",
       "Bash(dir /s /b *.css)",
       "Bash(mkdir:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(git reset:*)",
+      "Bash(dir /s /b *.db)",
+      "Bash(npx -v)",
+      "Bash(npx:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []
